@@ -1,11 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { Component } from 'react';
+import React from 'react';
 import { Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
 // For bottom tab
-import HomepageScreen from './../../screens/HomepageScreen';
+import HomepageScreen from '../screens/HomepageScreen';
+import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
+import AccountScreen from '../screens/AccountScreen';
 
 // For homepage stack
 
@@ -46,10 +48,42 @@ function HomepageBottomTab() {
             <Image
               style={{ width: 25, height: 25, resizeMode: 'contain'}}
               source={{
-                uri: 'https://reactnative.dev/img/tiny_logo.png',
+                uri: 'https://reactnative.dev/img/tiny_logo.png'
               }}
             />          
-          ),
+          )
+        }}
+      />
+
+      <MainBottomTab.Screen 
+        name="ViewMyPetsScreen" 
+        component={ViewMyPetsScreen}
+        options={{
+          tabBarLabel: 'View My Pets',
+          tabBarIcon: () => (
+            <Image
+              style={{ width: 25, height: 25, resizeMode: 'contain'}}
+              source={{
+                uri: 'https://reactnative.dev/img/tiny_logo.png'
+              }}
+            />          
+          )
+        }}
+      />
+
+      <MainBottomTab.Screen 
+        name="AccountScreen" 
+        component={AccountScreen}
+        options={{
+          tabBarLabel: 'Account',
+          tabBarIcon: () => (
+            <Image
+              style={{ width: 25, height: 25, resizeMode: 'contain'}}
+              source={{
+                uri: 'https://reactnative.dev/img/tiny_logo.png'
+              }}
+            />          
+          )
         }}
       />
 
