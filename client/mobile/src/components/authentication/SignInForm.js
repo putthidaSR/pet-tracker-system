@@ -14,7 +14,7 @@ export default class SignInForm extends Component {
       username: '',
       password: '',
       errorMessage: '',
-      isLoading: false, // flag to indicate whether the screen is still loading
+      isLoading: false // flag to indicate whether the screen is still loading
     };
     this.handleSignInUser = this.handleSignInUser.bind(this);
   }
@@ -29,7 +29,7 @@ export default class SignInForm extends Component {
         'Failed to Sign-in',
         '\nUsername and Password must not be empty.',
         [{ text: 'OK' }],
-        { cancelable: false },
+        { cancelable: false }
       );
       return;
     }
@@ -49,7 +49,7 @@ export default class SignInForm extends Component {
           'Failed to Sign-in',
           response.data.response,
           [{ text: 'OK' }],
-          { cancelable: false },
+          { cancelable: false }
         );
 
       } else {
@@ -68,7 +68,7 @@ export default class SignInForm extends Component {
         'Failed to Sign-in',
         error.message,
         [{ text: 'OK' }],
-        { cancelable: false },
+        { cancelable: false }
       );
       this.setState({isLoading: false});
 

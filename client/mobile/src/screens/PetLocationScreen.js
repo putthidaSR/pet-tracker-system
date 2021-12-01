@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 	
-export default class HomepageScreen extends Component {
+export default class PetLocationScreen extends Component {
   
   constructor(props) {
     super(props);
@@ -26,7 +26,7 @@ export default class HomepageScreen extends Component {
 
     return (
       <View style={styles.container}>
-        <Text>Home</Text>
+        <Text>Where is my pet</Text>
       </View>
     );
   }
