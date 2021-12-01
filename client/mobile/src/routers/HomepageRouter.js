@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { Image } from 'react-native';
+import { TouchableOpacity, Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Icon } from 'react-native-elements';
 
 // For bottom tab
 import HomepageScreen from '../screens/HomepageScreen';
@@ -10,6 +11,7 @@ import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
 import AccountScreen from '../screens/AccountScreen';
 
 // For homepage stack
+import WeatherInfoScreen from '../screens/WeatherInfoScreen';
 
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
@@ -98,6 +100,21 @@ function HomepageStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} >
       <Stack.Screen name="HomepageScreen" component={HomepageScreen} />
+
+      <Stack.Screen name="WeatherInfoScreen" component={WeatherInfoScreen} options={{
+        headerShown: true,
+        headerTitle: 'Should I go out?',
+        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
+        headerStyle: {backgroundColor: '#2196F3'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => this.props.navigation.navigate('Home')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => this.props.navigation.navigate('Home')} /></TouchableOpacity>
+        )
+      }} />
+
+        
     </Stack.Navigator>
   );
 }
