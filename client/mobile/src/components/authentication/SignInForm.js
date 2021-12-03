@@ -3,7 +3,7 @@ import React, { Component } from 'react'	;
 import { StyleSheet, Text, Alert, TextInput, ActivityIndicator, TouchableOpacity, View, Dimensions } from 'react-native';
 import axios from 'axios';
 import {SERVER_IP_ADDRESS, USER_KEY_STORAGE} from '../../Configuration';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class SignInForm extends Component {
 

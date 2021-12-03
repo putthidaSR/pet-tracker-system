@@ -1,8 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-
-import SignInScreen from './../../screens/SignInScreen';
-import SignUpScreen from './../../screens/SignUpScreen';
+import SignInScreen from '../screens/authentication/SignInScreen';
+import SignUpScreen from '../screens/authentication/SignUpScreen';
 import HomepageRouter from './HomepageRouter';
 
 /**

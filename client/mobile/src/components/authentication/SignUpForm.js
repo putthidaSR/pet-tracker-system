@@ -16,7 +16,7 @@ export default class SignUpForm extends Component {
       email: '',
       username: '',
       errorMessage: '',
-      isLoading: false, // flag to indicate whether the screen is still loading
+      isLoading: false // flag to indicate whether the screen is still loading
     };
 
     this.handleSignUpUser = this.handleSignUpUser.bind(this);
@@ -30,7 +30,7 @@ export default class SignUpForm extends Component {
         'Failed to Sign-up',
         '\nUsername and Password must not be empty.',
         [{ text: 'OK' }],
-        { cancelable: false },
+        { cancelable: false }
       );
       return;
     }
@@ -40,7 +40,7 @@ export default class SignUpForm extends Component {
         'Failed to Sign-up',
         '\nPassword must be at least 6 characters long.',
         [{ text: 'OK' }],
-        { cancelable: false },
+        { cancelable: false }
       );
       return;
     }
@@ -66,7 +66,7 @@ export default class SignUpForm extends Component {
           'Failed to Sign-up',
           response.data.response,
           [{ text: 'OK' }],
-          { cancelable: false },
+          { cancelable: false }
         );
         return;
       }
@@ -84,7 +84,7 @@ export default class SignUpForm extends Component {
         'Failed to Sign Up',
         error.message,
         [{ text: 'OK' }],
-        { cancelable: false },
+        { cancelable: false }
       );
     }
   }
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   textLink: {
     color: 'white',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   signUpSectionContainer: {
     width: Dimensions.get('window').width - 50,
@@ -199,5 +199,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 30,
     marginBottom: 50
-  },
+  }
 });

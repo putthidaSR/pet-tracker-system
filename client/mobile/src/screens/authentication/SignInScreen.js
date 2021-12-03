@@ -37,23 +37,23 @@ export default class SignInScreen extends Component {
 const styles = StyleSheet.create({
   fullSize: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    height: Dimensions.get('window').height
   },
   scrollViewContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#3498db',
+    backgroundColor: '#3498db'
   },
   logoContainer: {
     alignItems: 'center',
     flexGrow: 1,
     justifyContent: 'center',
-    marginTop: 100,
+    marginTop: 100
   },
   logo: {
     width: 100,
-    height: 100,
+    height: 100
   },
   titleText: {
     color: '#fff',
@@ -71,5 +71,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3498db',
     borderRadius: 50
-  },
+  }
 });
