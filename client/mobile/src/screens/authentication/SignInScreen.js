@@ -26,9 +26,9 @@ export default class SignInScreen extends Component {
           <View style={styles.logoContainer}>
             <Image
               style={styles.logo}
-              source={{uri: 'https://reactnative.dev/img/tiny_logo.png'}}
+              source={require('./../../assets/images/app-logo.png')}
             />
-            <Text style={styles.titleText}>Where is my pet?</Text>
+            <Text style={styles.titleText}>Welcome to the largest pet community...</Text>
           </View>
 
           {/** Form container */}
@@ -59,13 +59,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   logo: {
-    width: 100,
-    height: 100
+    width: 250,
+    height: 250
   },
   titleText: {
     color: '#fff',
     marginTop: 15,
-    width: 200,
     textAlign: 'center',
     opacity: 1,
     fontSize: 20,

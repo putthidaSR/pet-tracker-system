@@ -5,6 +5,10 @@ import { StyleSheet, Alert, Text, TextInput, TouchableOpacity, View, Dimensions,
 import axios from 'axios';
 import {SERVER_IP_ADDRESS} from '../../Configuration';
 
+/**************************************************************************************
+ * This class renders the sign-up form that will display for unauthorized user 
+ * or user who launches the app for the first time.
+ **************************************************************************************/
 export default class SignUpForm extends Component {
 
   constructor(props) {
@@ -180,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 20
   },
   buttonContainer: {
-    backgroundColor: '#2980b9',
+    backgroundColor: '#F5C945',
     paddingVertical: 15,
     borderRadius: 20
   },
@@ -191,7 +195,8 @@ const styles = StyleSheet.create({
   },
   textLink: {
     color: 'white',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    textDecorationLine: 'underline'
   },
   signUpSectionContainer: {
     width: Dimensions.get('window').width - 50,
