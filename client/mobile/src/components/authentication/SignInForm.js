@@ -5,11 +5,16 @@ import axios from 'axios';
 import {SERVER_IP_ADDRESS, USER_KEY_STORAGE} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**************************************************************************************
+ * This class renders the sign-in form that will display for unauthorized user 
+ * or user who launches the app for the first time.
+ **************************************************************************************/
 export default class SignInForm extends Component {
 
   constructor(props) {
 
     super(props);
+
     this.state = {
       username: '',
       password: '',
@@ -92,9 +97,10 @@ export default class SignInForm extends Component {
     return (
       <View style={styles.container}>
 
+        <Text style={styles.fieldTitleText}>Username<Text style={{color: 'red'}}> *</Text></Text>
         <TextInput
           style={styles.input}
-          placeholder = "Username"
+          placeholder = "Enter your username"
           placeholderTextColor = "rgba(255, 255, 255, 0.7)"
           autoCapitalize = "none"
           autoCorrect = {false}
@@ -104,9 +110,11 @@ export default class SignInForm extends Component {
           onFocus = { () => this.setState({username: ''})}
           underlineColorAndroid = "#fff"
         />
+
+        <Text style={styles.fieldTitleText}>Password<Text style={{color: 'red'}}> *</Text></Text>
         <TextInput
           style={styles.input}
-          placeholder = "Password"
+          placeholder = "Enter your password"
           placeholderTextColor = "rgba(255, 255, 255, 0.7)"
           autoCapitalize = "none"
           secureTextEntry = {true}
@@ -125,7 +133,7 @@ export default class SignInForm extends Component {
 
         <View style={{width: Dimensions.get('window').width - 50, flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 30}}>
           <TouchableOpacity onPress={() => this.props.navigation.navigate('SignUpScreen')}>
-            <Text style={{color: 'white', backgroundColor: 'transparent'}}>Create Account</Text>
+            <Text style={{color: '#0F2F44', backgroundColor: 'transparent', textDecorationLine: 'underline'}}>Create Account</Text>
           </TouchableOpacity>
         </View>
         
@@ -137,19 +145,26 @@ export default class SignInForm extends Component {
 	
 const styles = StyleSheet.create({
   container: {
-    padding: 20
+    padding: 20,
+    marginTop: 50
+  },
+  fieldTitleText: {
+    color: '#0F2F44', 
+    fontWeight: 'bold', 
+    paddingLeft: 10,
+    paddingBottom: 5
   },
   input: {
     width: Dimensions.get('window').width - 50,
     height: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: 20,
-    color: '#FFF',
+    color: '#0F2F44',
     paddingHorizontal: 20,
     borderRadius: 20
   },
   buttonContainer: {
-    backgroundColor: '#2980b9',
+    backgroundColor: '#F5C945',
     paddingVertical: 15,
     borderRadius: 20
   },

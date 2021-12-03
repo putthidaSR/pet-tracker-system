@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import { StyleSheet, Text, View, Dimensions, KeyboardAvoidingView, ScrollView, Image } from 'react-native';
-
 import SignUpForm from './../../components/authentication/SignUpForm';
 
+/**
+ * This class represents the components to build sign-up screen.
+ */
 export default class SignUpScreen extends Component {
 
   constructor(props) {
