@@ -7,11 +7,13 @@ import { Icon } from 'react-native-elements';
 
 // For bottom tab
 import HomepageScreen from '../screens/HomepageScreen';
-import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
 import AccountScreen from '../screens/AccountScreen';
 
 // For homepage stack
+import PetRegistrationScreen from '../screens/PetRegistrationScreen';
 import WeatherInfoScreen from '../screens/WeatherInfoScreen';
+import PetLocationScreen from '../screens/PetLocationScreen';
+import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
 
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
@@ -32,7 +34,7 @@ function HomepageBottomTab() {
   return (
     <MainBottomTab.Navigator
       initialRouteName="Home"
-      tabBarOptions= {{
+      screenOptions= {{
         activeTintColor: '#2980b9',
         backgroundColor: 'blue',
         inactiveTintColor: 'rgba(0,0,0,0.3)',
@@ -45,13 +47,12 @@ function HomepageBottomTab() {
         name="Home" 
         component={HomepageStack}
         options={{
+          headerShown: false,
           tabBarLabel: 'Home',
           tabBarIcon: () => (
             <Image
               style={{ width: 25, height: 25, resizeMode: 'contain'}}
-              source={{
-                uri: 'https://reactnative.dev/img/tiny_logo.png'
-              }}
+              source={require('./../assets/images/home.png')}
             />          
           )
         }}
@@ -61,13 +62,12 @@ function HomepageBottomTab() {
         name="ViewMyPetsScreen" 
         component={ViewMyPetsScreen}
         options={{
+          headerShown: false,
           tabBarLabel: 'View My Pets',
           tabBarIcon: () => (
             <Image
               style={{ width: 25, height: 25, resizeMode: 'contain'}}
-              source={{
-                uri: 'https://reactnative.dev/img/tiny_logo.png'
-              }}
+              source={require('./../assets/images/paw.png')}
             />          
           )
         }}
@@ -77,13 +77,12 @@ function HomepageBottomTab() {
         name="AccountScreen" 
         component={AccountScreen}
         options={{
+          headerShown: false,
           tabBarLabel: 'Account',
           tabBarIcon: () => (
             <Image
               style={{ width: 25, height: 25, resizeMode: 'contain'}}
-              source={{
-                uri: 'https://reactnative.dev/img/tiny_logo.png'
-              }}
+              source={require('./../assets/images/account.png')}
             />          
           )
         }}
@@ -99,20 +98,62 @@ function HomepageStack() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} >
-      <Stack.Screen name="HomepageScreen" component={HomepageScreen} />
+      <Stack.Screen name="HomepageScreen" component={HomepageScreen} options={{
+        headerShown: false
+      }} />
 
-      <Stack.Screen name="WeatherInfoScreen" component={WeatherInfoScreen} options={{
+      <Stack.Screen name="ViewMyPets" component={ViewMyPetsScreen} options={({ navigation }) => ({
+        headerShown: true,
+        headerTitle: 'My Pets',
+        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
+        headerStyle: {backgroundColor: '#2196F3'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        )
+      })} />
+
+      <Stack.Screen name="PetRegistration" component={PetRegistrationScreen} options={({ navigation }) => ({
+        headerShown: true,
+        headerTitle: 'Register New Pet',
+        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
+        headerStyle: {backgroundColor: '#2196F3'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        )
+      })} />
+
+
+      <Stack.Screen name="PetLocationScreen" component={PetLocationScreen} options={({ navigation }) => ({
+        headerShown: true,
+        headerTitle: 'Track My Pets',
+        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
+        headerStyle: {backgroundColor: '#2196F3'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        )
+      })} />
+
+      <Stack.Screen name="WeatherInfoScreen" component={WeatherInfoScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Should I go out?',
         headerTitleStyle: {fontWeight: 'bold', color: 'white'},
         headerStyle: {backgroundColor: '#2196F3'},
         headerLeft: () => (
-          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => this.props.navigation.navigate('Home')} /></TouchableOpacity>
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         ),
         headerRight: () => (
-          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => this.props.navigation.navigate('Home')} /></TouchableOpacity>
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         )
-      }} />
+      })} />
 
         
     </Stack.Navigator>
