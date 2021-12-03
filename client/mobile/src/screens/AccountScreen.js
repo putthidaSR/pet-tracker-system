@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 	
-export default class HomepageScreen extends Component {
+export default class AccountScreen extends Component {
   
   constructor(props) {
     super(props);
