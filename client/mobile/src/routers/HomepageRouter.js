@@ -105,8 +105,8 @@ function HomepageStack() {
       <Stack.Screen name="ViewMyPets" component={ViewMyPetsScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'My Pets',
-        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
-        headerStyle: {backgroundColor: '#2196F3'},
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (
           <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         ),
@@ -118,8 +118,8 @@ function HomepageStack() {
       <Stack.Screen name="PetRegistration" component={PetRegistrationScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Register New Pet',
-        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
-        headerStyle: {backgroundColor: '#2196F3'},
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (
           <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         ),
@@ -132,8 +132,8 @@ function HomepageStack() {
       <Stack.Screen name="PetLocationScreen" component={PetLocationScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Track My Pets',
-        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
-        headerStyle: {backgroundColor: '#2196F3'},
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (
           <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         ),
@@ -145,8 +145,8 @@ function HomepageStack() {
       <Stack.Screen name="WeatherInfoScreen" component={WeatherInfoScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Should I go out?',
-        headerTitleStyle: {fontWeight: 'bold', color: 'white'},
-        headerStyle: {backgroundColor: '#2196F3'},
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (
           <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
         ),
