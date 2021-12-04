@@ -14,6 +14,7 @@ import PetRegistrationScreen from '../screens/PetRegistrationScreen';
 import WeatherInfoScreen from '../screens/WeatherInfoScreen';
 import PetLocationScreen from '../screens/AllPetsLocationScreen';
 import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
+import EachPetLocationScreen from '../screens/EachPetLocationScreen';
 
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
@@ -116,6 +117,19 @@ function HomepageStack() {
         )
       })} />
 
+      <Stack.Screen name="EachPetLocation" component={EachPetLocationScreen} options={({ navigation }) => ({
+        headerShown: true,
+        headerTitle: 'Track Last Seen Locations',
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('ViewMyPets')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        )
+      })} />
+
       <Stack.Screen name="PetRegistration" component={PetRegistrationScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Register New Pet',
@@ -132,7 +146,7 @@ function HomepageStack() {
 
       <Stack.Screen name="PetLocationScreen" component={PetLocationScreen} options={({ navigation }) => ({
         headerShown: true,
-        headerTitle: 'Track My Pets',
+        headerTitle: 'Track All My Pets',
         headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
         headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (

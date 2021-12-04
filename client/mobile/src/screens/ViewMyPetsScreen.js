@@ -132,7 +132,9 @@ export default class ViewMyPetsScreen extends Component {
                 titleStyle={{fontSize: 14, fontWeight: 'bold'}}
                 buttonStyle={{backgroundColor: '#0F2F44', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
                 title="View Location History"
-                onPress={() => this.viewLatestLocations(data.id)}
+                onPress={() => this.props.navigation.navigate('EachPetLocation', {
+                  petId: data.id
+                })}
               />
   
               <Text style={{fontSize: 12, textAlign: 'right', padding: 5, marginTop: 5}}>Last Updated: {moment(data.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>

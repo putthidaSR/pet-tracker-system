@@ -2,7 +2,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
 import { StyleSheet, Alert, Text, View, ActivityIndicator, TouchableHighlight } from "react-native";
-import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker, Callout, Polygon } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
@@ -18,6 +18,7 @@ export default class PetLocationScreen extends Component {
     super(props);
       
     this.state = {
+      petId: this.props.route.params.petId,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -28,11 +29,11 @@ export default class PetLocationScreen extends Component {
       currentLongitude: -122.437828,
       markers: [],
       coordinates: [
-        { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
+        { address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
+        { address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
+        { address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
+        { address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
+        { address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
       ],
       isLoading: false // flag to indicate whether the screen is still loading
     };
@@ -131,16 +132,23 @@ export default class PetLocationScreen extends Component {
           ref={map => {this._map = map; }}
           style={styles.map}
           loadingEnabled={true}
+          //initialRegion={this.getMapRegion()}
           followUserLocation={true}
           showsUserLocation={true}
           zoomEnabled={true}
           initialRegion={this.state.initialRegion}
           onMapReady={this.goToInitialLocation.bind(this)}
         >
+          <Polygon
+            coordinates={this.state.coordinates}
+            fillColor={'yellow'}
+            strokeWidth={4}
+          />
           <Marker
             draggable
             coordinate={{ latitude: 47.244316, longitude: -122.437031}}
-            title="You are here!"
+            image={require('./../assets/images/user.png')}
+            title="Your Destination"
           />
           
           {this.state.coordinates.map((marker, index) => {
@@ -151,16 +159,14 @@ export default class PetLocationScreen extends Component {
                 ref={ref => {this.state.markers[index] = ref; }}
                 onPress={() => this.onMarkerPressed(marker, index)}
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                image={require('./../assets/images/paw.png')}
+                image={require('./../assets/images/pet-location.png')}
               >
                 <Callout>
-                  <View style={{width: 250, height: 200}}>
+                  <View style={{width: 250, height: 150, padding: 5}}>
 
-                    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{marker.name}</Text>
-                    
-                    <Text>Last Seen Location: {marker.address}{'\n'}</Text>
+                    <Text>Location Seen: {marker.address}{'\n'}</Text>
 
-                    <Text>Last Updated: {moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
+                    <Text>Time Seen: {moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
 
                     <TouchableHighlight
                       style={{justifyContent: 'center', alignItems: 'center'}}
