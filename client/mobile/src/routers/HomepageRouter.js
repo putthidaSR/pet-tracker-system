@@ -97,6 +97,7 @@ function HomepageStack() {
   const Stack = createStackNavigator();
 
   return (
+    
     <Stack.Navigator screenOptions={{ headerShown: false }} >
       <Stack.Screen name="HomepageScreen" component={HomepageScreen} options={{
         headerShown: false
