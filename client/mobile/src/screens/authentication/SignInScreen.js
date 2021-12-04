@@ -2,6 +2,9 @@ import React, {Component} from 'react';
 import { StyleSheet, Text, View, Image, KeyboardAvoidingView, ScrollView, Dimensions } from 'react-native';
 import SignInForm from './../../components/authentication/SignInForm';
 
+/**
+ * This class represents the components to build sign in screen.
+ */
 export default class SignInScreen extends Component {
 
   constructor(props) {
@@ -9,19 +12,23 @@ export default class SignInScreen extends Component {
   }
 
   render() {
+
     return (
+
+      // Create scrollable login form
       <KeyboardAvoidingView behavior="padding" style={styles.fullSize}>
         <ScrollView
           contentContainerStyle={styles.scrollViewContainer}
           keyboardShouldPersistTaps="never"
           scrollEnabled={false}>
+
           {/** Logo container */}
           <View style={styles.logoContainer}>
             <Image
               style={styles.logo}
-              source={{uri: 'https://reactnative.dev/img/tiny_logo.png'}}
+              source={require('./../../assets/images/app-logo.png')}
             />
-            <Text style={styles.titleText}>Where is my pet</Text>
+            <Text style={styles.titleText}>Welcome to the largest pet community...</Text>
           </View>
 
           {/** Form container */}
@@ -34,6 +41,7 @@ export default class SignInScreen extends Component {
   }
 }
 
+// style variables to be used in sign-in screen
 const styles = StyleSheet.create({
   fullSize: {
     width: Dimensions.get('window').width,
@@ -43,22 +51,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#3498db'
+    backgroundColor: '#0F2F44'
   },
   logoContainer: {
     alignItems: 'center',
     flexGrow: 1,
-    justifyContent: 'center',
-    marginTop: 100
+    justifyContent: 'center'
   },
   logo: {
-    width: 100,
-    height: 100
+    width: 250,
+    height: 250
   },
   titleText: {
     color: '#fff',
     marginTop: 15,
-    width: 200,
     textAlign: 'center',
     opacity: 1,
     fontSize: 20,
@@ -68,8 +74,8 @@ const styles = StyleSheet.create({
   formContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    backgroundColor: '#3498db',
+    height: Dimensions.get('window').height / 2.5,
+    backgroundColor: '#EAF1FF',
     borderRadius: 50
   }
 });

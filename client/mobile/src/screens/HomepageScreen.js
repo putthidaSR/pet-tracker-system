@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
-	
+import { StyleSheet, TouchableOpacity, SafeAreaView, Text, View, ActivityIndicator, Dimensions, Image } from "react-native";
+
 export default class HomepageScreen extends Component {
   
   constructor(props) {
@@ -10,6 +10,40 @@ export default class HomepageScreen extends Component {
     this.state = {
       isLoading: false // flag to indicate whether the screen is still loading
     };
+  }
+  
+  renderTitleView() {
+    return (
+      <View style={{marginTop: 30, height: TITLE_HEIGHT_VIEW - 80, width: Dimensions.get('window').width - 50, justifyContent: 'center', borderRadius: 30, alignSelf: 'center', 
+        backgroundColor: '#0F2F44'}}>
+
+        {/** Logo container */}
+        <View style={styles.logoContainer}>
+          <Image
+            style={{width: 100, height: 100, resizeMode: 'contain'}}
+            source={require('./../assets/images/app-logo.png')}
+          />
+          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the pet community!</Text>
+        </View>
+      </View>
+    );
+  }
+
+  renderMenuOption = (title, navigatorRouteName, imagePath) => {
+    return (
+      <View style={styles.menuButtonContainer}>
+        <TouchableOpacity style={styles.navBarLeftButton} onPress={() => this.props.navigation.navigate(navigatorRouteName) }>
+          <Image
+            style={styles.button}
+            source={imagePath}
+          />
+          <Text style={styles.bottonOptionText}>
+            {title}
+          </Text>
+        </TouchableOpacity>
+        
+      </View>
+    );
   }
     
   render() {
@@ -25,20 +59,101 @@ export default class HomepageScreen extends Component {
     }
 
     return (
-      <View style={styles.container}>
-        <Text>Home</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+ 
+        <View style={{alignSelf: 'center', backgroundColor: '#F5C945', position: 'absolute', top: 0, left: 0, 
+          width: Dimensions.get('window').width, height: 200}} />
+
+        {this.renderTitleView()}
+
+        <Image
+          style={{width: 100, height: 70, resizeMode: 'contain'}}
+          source={require('./../assets/images/paw.gif')}
+        />
+
+        <View style={styles.buttonContainer}>
+          {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
+          {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
+          {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
+          {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
+        </View>
+
+      </SafeAreaView>
     );
   }
 
 }
 	
+const WHOLE_VIEW = Dimensions.get('window').height;
+const TITLE_HEIGHT_VIEW = (WHOLE_VIEW / 2) - 150;
+const OPTIONS_HEIGHT_VIEW = WHOLE_VIEW - TITLE_HEIGHT_VIEW;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center"
+    backgroundColor: '#fff'
+  },
+  logoContainer: {
+    alignItems: 'center',
+    flexGrow: 1,
+    marginTop: 30
+  },
+  menuButtonContainer: {
+    backgroundColor: '#EAF1FF', 
+    alignSelf: 'center',
+    justifyContent: 'center',
+    height: 80,
+    width: Dimensions.get('window').width - 50,
+    borderColor: '#F5C945',
+    borderBottomWidth: 4,
+    borderRadius: 30,
+    shadowOffset: {
+      width: 5,
+      height: 10
+    },
+    shadowColor: 'rgba(0,0,0,1)',
+    shadowOpacity: 0.73,
+    shadowRadius: 10,
+    elevation: 15,
+    zIndex: 5,
+    marginBottom: 20
+  },
+  button: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginLeft: 15
+  },
+  titleText: {
+    color: '#EAF1FF',
+    fontFamily: 'SavoyeLetPlain',
+    fontWeight: 'bold',
+    fontSize: 70,
+    alignSelf: 'center',
+    paddingTop: 10,
+    paddingBottom: 10,
+    position: 'absolute',
+    top: 100,
+    zIndex: 4
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    height: OPTIONS_HEIGHT_VIEW
+  },
+  bottonOptionText: {
+    textAlign: 'center', 
+    fontSize: 16, 
+    fontWeight: 'bold',
+    color: '#0F2F44',
+    paddingLeft: 20
+  },
+  navBarLeftButton: {
+    paddingLeft: 20,
+    width: 240,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   }
 });
-

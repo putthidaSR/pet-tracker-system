@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.11",
+    "@react-native-community/blur": "^3.6.0",
     "@react-native-community/push-notification-ios": "^1.10.1",
     "@react-navigation/bottom-tabs": "^6.0.9",
     "@react-navigation/native": "^6.0.6",
@@ -22,13 +23,17 @@
     "react-native-elements": "^3.4.2",
     "react-native-geolocation-service": "^5.3.0-beta.3",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-google-maps-directions": "^2.1.1",
     "react-native-keyboard-aware-scroll-view": "github:APSL/react-native-keyboard-aware-scroll-view#pull/501/head",
     "react-native-maps": "0.29.4",
     "react-native-modals": "^0.22.3",
     "react-native-permissions": "^3.1.0",
     "react-native-push-notification": "^8.1.1",
+    "react-native-reanimated": "^2.3.0-beta.4",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.9.0",
+    "react-native-snap-carousel": "^3.9.1",
+    "react-native-ui-lib": "^6.5.1",
     "react-native-vector-icons": "^9.0.0"
   },
   "devDependencies": {
