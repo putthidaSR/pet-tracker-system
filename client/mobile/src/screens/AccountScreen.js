@@ -27,8 +27,6 @@ export default class AccountScreen extends Component {
 
     return (
       <View style={styles.container}>
-        <Text>Home</Text>
-
         <Button type="solid" title="LOGOUT"
           titleStyle={{fontSize: 15, fontWeight: 'bold'}}
           containerStyle={{width: (Dimensions.get('window').width) - 60, alignSelf: 'center', paddingBottom: 15, paddingTop: 15}}
@@ -37,7 +35,7 @@ export default class AccountScreen extends Component {
             borderColor: 'white',
             borderRadius:15,
             height: 55,
-            backgroundColor: '#05b6ff'
+            backgroundColor: '#0F2F44'
           }}
           onPress={() => this.props.navigation.navigate('Authentication')}
         />

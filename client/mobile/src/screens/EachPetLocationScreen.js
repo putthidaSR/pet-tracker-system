@@ -1,10 +1,9 @@
 /* eslint-disable react/no-direct-mutation-state */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, Alert, Text, View, ActivityIndicator, TouchableHighlight } from "react-native";
+import { StyleSheet, Alert, Text, View, ActivityIndicator } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Polygon } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
-import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
 
 const LATITUDE_DELTA = 0.09;
@@ -164,22 +163,11 @@ export default class PetLocationScreen extends Component {
                 <Callout>
                   <View style={{width: 250, height: 150, padding: 5}}>
 
-                    <Text>Location Seen: {marker.address}{'\n'}</Text>
+                    <Text style={{fontWeight: 'bold'}}>Location Seen:</Text>
+                    <Text>{marker.address}{'\n'}</Text>
 
-                    <Text>Time Seen: {moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
-
-                    <TouchableHighlight
-                      style={{justifyContent: 'center', alignItems: 'center'}}
-                      onPress={() => NavigateBetweenTwoRoutes.handleGetDirections(
-                        this.state.currentLatitude, 
-                        this.state.currentLongitude, 
-                        marker.latitude, 
-                        marker.longitude, 
-                        'driving')}>
-                      <View style={styles.directionButton}>
-                        <Text style={{textAlign: 'center', color: 'white'}}>Get Direction</Text>
-                      </View>
-                    </TouchableHighlight>
+                    <Text style={{fontWeight: 'bold'}}>Time Seen:</Text>
+                    <Text>{moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
                   </View>
                 </Callout>
 
@@ -199,15 +187,6 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject
-  },
-  directionButton: {
-    marginTop: 15,
-    width: 110,
-    height: 30,
-    alignItems: 'center',
-    backgroundColor: '#0F2F44',
-    justifyContent: 'center',
-    borderRadius: 5
   }
 });
 

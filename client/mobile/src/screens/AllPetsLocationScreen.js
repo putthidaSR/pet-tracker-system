@@ -1,11 +1,12 @@
 /* eslint-disable react/no-direct-mutation-state */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, Alert, Text, View, ActivityIndicator, TouchableHighlight } from "react-native";
+import { StyleSheet, Alert, Text, View, ActivityIndicator, Image, TouchableHighlight, Dimensions } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
@@ -34,6 +35,8 @@ export default class PetLocationScreen extends Component {
         { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
         { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
       ],
+      selectedIndex: 0,
+      activeSlide: 0,
       isLoading: false // flag to indicate whether the screen is still loading
     };
 
@@ -94,7 +97,7 @@ export default class PetLocationScreen extends Component {
     longitudeDelta: LONGITUDE_DELTA
   });
 
-  onMarkerPressed = (location) => {
+  onMarkerPressed = (location, index) => {
     this._map.animateToRegion({
       latitude: location.latitude,
       longitude: location.longitude,
@@ -102,7 +105,21 @@ export default class PetLocationScreen extends Component {
       longitudeDelta: 0.005
     });
 
-    //this._carousel.snapToItem(index);
+    this._carousel.snapToItem(index);
+  }
+
+  onCarouselItemChange = (index) => {
+    let location = this.state.coordinates[index];
+    this.setState({activeSlide: index});
+
+    this._map.animateToRegion({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005
+    });
+
+    this.state.markers[index].showCallout();
   }
 
   goToInitialLocation() {
@@ -110,6 +127,70 @@ export default class PetLocationScreen extends Component {
     initialRegion["latitudeDelta"] = 0.005;
     initialRegion["longitudeDelta"] = 0.005;
     this._map.animateToRegion(initialRegion, 2000);
+  }
+
+  renderCarouselItem = ({ item }) => {
+    //console.log('valueeee', item, this.state.currentLatitude);
+    return (
+      <View style={styles.cardContainer}>
+
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+
+          <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{item.name}</Text>
+
+          <Image style={{width: 40, height: 40}} source={require('./../assets/images/paw.png')} />
+        </View>
+
+        <View style={{alignItems: 'center', paddingTop: 5}}>
+          <TouchableHighlight
+            onPress={() => NavigateBetweenTwoRoutes.handleGetDirections(
+              this.state.currentLatitude, 
+              this.state.currentLongitude, 
+              item.latitude, 
+              item.longitude, 
+              'driving')}
+          >
+            <View style={{
+              width: 110,
+              height: 30,
+              alignItems: 'center',
+              backgroundColor: '#377FEA',
+              justifyContent: 'center',
+              borderRadius: 5}}>
+              <Text style={{textAlign: 'center',
+                color: 'white'}}>Get Direction</Text>
+            </View>
+          </TouchableHighlight></View>    
+      </View>
+    );
+  }
+
+  /**
+   * Render pagination below carousel container.
+   */
+  get pagination () {
+    return (
+      <Pagination
+        dotsLength={this.state.coordinates.length}
+        activeDotIndex={this.state.activeSlide}
+        containerStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', paddingVertical: 10, marginTop: 10, paddingHorizontal: 10, borderRadius: 15, alignItems: 'center' }}
+        dotColor={'rgba(0, 0, 0, 0.92)'}
+        dotStyle={{
+          width: 15,
+          height: 15,
+          borderRadius: 10,
+          marginHorizontal: 8,
+          backgroundColor: 'rgba(0, 0, 0, 0.92)'
+        }}
+        inactiveDotOpacity={0.4}
+        inactiveDotScale={0.6}
+        inactiveDotColor={'black'}
+      />
+    );
+  }
+
+  updateIndex = (selectedIndex) => {
+    this.setState({selectedIndex});
   }
 
   render() {
@@ -181,6 +262,23 @@ export default class PetLocationScreen extends Component {
             );
           })}
         </MapView>
+
+        <Carousel
+          ref={(c) => { this._carousel = c; }}
+          layout={'default'}
+          layoutCardOffset={'5'}
+          data={this.state.coordinates}
+          containerCustomStyle={styles.carousel}
+          renderItem={this.renderCarouselItem}
+          sliderWidth={Dimensions.get('window').width}
+          itemWidth={180}
+          removeClippedSubviews={false}
+          onSnapToItem={(index) => this.onCarouselItemChange(index)}
+        />
+
+        <View style={{alignSelf: 'center', bottom: 0, position: 'absolute', marginBottom: 10, marginTop: 20, width: Dimensions.get('window').width - 100}}>
+          {this.pagination}
+        </View>
       </View>
     );
   }
@@ -202,6 +300,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F2F44',
     justifyContent: 'center',
     borderRadius: 5
+  },
+  carousel: {
+    position: 'absolute',
+    bottom: 0,
+    marginBottom: 45
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    height: 220,
+    width: 180,
+    padding: 5,
+    borderRadius: 24,
+    borderWidth: 1
   }
 });
 
