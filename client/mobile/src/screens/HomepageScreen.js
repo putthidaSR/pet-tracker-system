@@ -75,7 +75,7 @@ export default class HomepageScreen extends Component {
           {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
           {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
           {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
-          {this.renderMenuOption("Let's Go Out!", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
+          {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
         </View>
 
       </SafeAreaView>

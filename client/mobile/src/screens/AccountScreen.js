@@ -1,7 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
-	
+import { StyleSheet, Text, View, ActivityIndicator, Dimensions } from "react-native";
+import { Button } from 'react-native-elements';
+
 export default class AccountScreen extends Component {
   
   constructor(props) {
@@ -27,6 +28,19 @@ export default class AccountScreen extends Component {
     return (
       <View style={styles.container}>
         <Text>Home</Text>
+
+        <Button type="solid" title="LOGOUT"
+          titleStyle={{fontSize: 15, fontWeight: 'bold'}}
+          containerStyle={{width: (Dimensions.get('window').width) - 60, alignSelf: 'center', paddingBottom: 15, paddingTop: 15}}
+          buttonStyle={{
+            borderWidth: 3,
+            borderColor: 'white',
+            borderRadius:15,
+            height: 55,
+            backgroundColor: '#05b6ff'
+          }}
+          onPress={() => this.props.navigation.navigate('Authentication')}
+        />
       </View>
     );
   }
