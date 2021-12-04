@@ -1,9 +1,11 @@
 /* eslint-disable react/no-direct-mutation-state */
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, Alert, Text, View, ActivityIndicator } from "react-native";
+import { StyleSheet, Alert, Text, View, ActivityIndicator, TouchableHighlight } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Polygon } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
+import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
+import moment from 'moment';
 
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
@@ -22,15 +24,15 @@ export default class PetLocationScreen extends Component {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421
       }, 
-      currentLatitude: 0,
-      currentLongitude: 0,
+      currentLatitude: 47.244839,
+      currentLongitude: -122.437828,
       markers: [],
       coordinates: [
-        { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828},
-        { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257},
-        { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741},
-        { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660},
-        { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332}
+        { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
+        { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
+        { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
+        { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
+        { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
       ],
       isLoading: false // flag to indicate whether the screen is still loading
     };
@@ -159,10 +161,26 @@ export default class PetLocationScreen extends Component {
                 image={require('./../assets/images/paw.png')}
               >
                 <Callout>
-                  <View style={{justifyContent: 'center', alignItems: 'center', width: 170, height: 130}}>
-                    {/* <Text><Image style={{width: 45, height: 60, resizeMode: 'contain'}} source={marker.image} /></Text> */}
-                    <Text>{marker.name}</Text>
-                    <Text>Current location: {marker.address}</Text>
+                  <View style={{width: 250, height: 200}}>
+
+                    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{marker.name}</Text>
+                    
+                    <Text>Last Seen Location: {marker.address}{'\n'}</Text>
+
+                    <Text>Last Updated: {moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
+
+                    <TouchableHighlight
+                      style={{justifyContent: 'center', alignItems: 'center'}}
+                      onPress={() => NavigateBetweenTwoRoutes.handleGetDirections(
+                        this.state.currentLatitude, 
+                        this.state.currentLongitude, 
+                        marker.latitude, 
+                        marker.longitude, 
+                        'driving')}>
+                      <View style={styles.directionButton}>
+                        <Text style={{textAlign: 'center', color: 'white'}}>Get Direction</Text>
+                      </View>
+                    </TouchableHighlight>
                   </View>
                 </Callout>
 
@@ -182,6 +200,15 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject
+  },
+  directionButton: {
+    marginTop: 15,
+    width: 110,
+    height: 30,
+    alignItems: 'center',
+    backgroundColor: '#0F2F44',
+    justifyContent: 'center',
+    borderRadius: 5
   }
 });
 

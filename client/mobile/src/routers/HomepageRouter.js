@@ -12,7 +12,7 @@ import AccountScreen from '../screens/AccountScreen';
 // For homepage stack
 import PetRegistrationScreen from '../screens/PetRegistrationScreen';
 import WeatherInfoScreen from '../screens/WeatherInfoScreen';
-import PetLocationScreen from '../screens/PetLocationScreen';
+import PetLocationScreen from '../screens/AllPetsLocationScreen';
 import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
 
 /**
@@ -97,7 +97,7 @@ function HomepageStack() {
   const Stack = createStackNavigator();
 
   return (
-    
+
     <Stack.Navigator screenOptions={{ headerShown: false }} >
       <Stack.Screen name="HomepageScreen" component={HomepageScreen} options={{
         headerShown: false
