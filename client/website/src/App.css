@@ -24,14 +24,23 @@ a:hover{
 }
 
 .navbar{
-    flex: 0.2;
+    flex: 0;
     background-color: #F5C945;
 }
+
+.centered {
+    height: 100vh; /* Magic here */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 350px;
+    width: 80%;
+  }
 
 .main{
     flex: 0.8;
     width: 100%;
-    
+    padding-left: 50px;
 }
 .routes{
     padding: 20px;
