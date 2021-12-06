@@ -1,3 +1,8 @@
 
 client/.DS_Store
 .DS_Store
+server/pet-tracker/.settings/org.eclipse.jdt.core.prefs
+server/pet-tracker/.settings/org.eclipse.wst.common.component
+server/pet-tracker/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
+server/pet-tracker/.settings/org.eclipse.wst.common.project.facet.core.xml
+server/pet-tracker/.settings/org.eclipse.wst.validation.prefs
