@@ -1,9 +1,9 @@
 package tcss559.controllers;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +11,7 @@ import java.util.Random;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,9 +30,7 @@ import com.google.gson.JsonObject;
 
 import tcss559.hibernate.HibernateUtils;
 import tcss559.model.User;
-import tcss559.request.UpdateUser;
 import tcss559.utilities.*;
-
 
 @Path("/users")
 public class UserRegistration {
@@ -85,6 +84,8 @@ public class UserRegistration {
 		
 		try {
 			
+			System.out.println("Attempt to register a new veterinarian");
+			
 			Session session = HibernateUtils.getSession();
 			Transaction t = session.beginTransaction();
 			
@@ -114,12 +115,18 @@ public class UserRegistration {
 
 			// Return successful response if no error
 			return Response.status(Response.Status.OK)
+					.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Credentials", "true")
+					.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+					.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 					.entity(jsonResponse)
 					.build();
 						
 		} catch (Exception e) {
 			// Return expected error response
 			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+					.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Credentials", "true")
+					.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+					.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
@@ -184,9 +191,10 @@ public class UserRegistration {
 			 */
 			Random random = new Random();
 			int confirmationCode = random.ints(1000, 9999).findFirst().getAsInt();
-			user.setConfirmationCode(confirmationCode);
 			
-			session.save(user);
+			// Generate unique code by placing user ID in front (since user ID is primary key, it is auto-incremented and unique)
+			int uniqueCode = Integer.valueOf(String.valueOf(user.getId()) + String.valueOf(confirmationCode));
+			user.setConfirmationCode(uniqueCode);
 			
 			if (user.getPhoneNumber() != null) {
 				
@@ -196,11 +204,7 @@ public class UserRegistration {
 								+ confirmationCode);
 			}
 			
-			
-			
-			int userId = user.getId();
-			System.out.println(userId);
-						
+			session.save(user);
 			t.commit();
 	        session.close();
 			
@@ -221,18 +225,19 @@ public class UserRegistration {
 	}
 	
 	/**
-	 * Check if the specified badge number exists in the system. If yes, returns the vet account detail.
+	 * Check if the specified account exists in the system. If yes, returns the account detail.
 	 * @param badgeNumber
 	 * @return
 	 */
-	@Path("/vet/{badge_number}")
+	@Path("/")
 	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getVetAccountDetail(@PathParam("badge_number") String badgeNumber) {
+	public Response getUserAccountDetail(@PathParam("badge_number") String badgeNumber) {
 				
 		try { 
 			
-			// Establish connection to Google Cloud MySQL
+			// Establish connection to MySQL server
         	Connection connection = HandleConnection.getConnection();
         	Statement sqlStatement = connection.createStatement();	
         	
@@ -272,6 +277,64 @@ public class UserRegistration {
 	}
 	
 	/**
+	 * DONE
+	 * 
+	 * @param user
+	 * @return
+	 */
+	@Path("/login")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response AccountLogin(User user) {
+		
+		try {
+
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+        	// Construct the query to return matching record
+    		PreparedStatement stmt = connection.prepareStatement("select * from user where login_name = ? and login_password = ?");
+    		stmt.setString(1, user.getLoginName());
+    		stmt.setString(2, user.getLoginPassword());
+    		
+            // Execute SQL query
+    		ResultSet rs = stmt.executeQuery();  
+    		
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			JsonObject obj = new JsonObject();
+
+	    	// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+				obj.addProperty("id", rs.getInt("id"));
+				obj.addProperty("username", rs.getString("login_name"));
+				
+				jsonResponse = gson.toJson(obj);
+			}
+			
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+			
+			connection.close();
+			
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Fail to login")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	/**
 	 * @api {PUT} /users/:id Update User information
 	 * @apiName UpdateUser
 	 * @apiGroup UserRegistration
@@ -287,17 +350,69 @@ public class UserRegistration {
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
 	 */
-	@Path("/{id}")
+	@Path("/")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response UpdateUser(User user, @PathParam("id") int id) {
+	public Response UpdateUser(User user, @HeaderParam("badge_number") String badgeNumber, @HeaderParam("confirmation_code") int confirmationCode) {
 		
-		try { 
-			user.setModificationTime(new Date());
-			// Constructure JSON response from Java object
+		try {
+			
+			// Establish connection to Google Cloud MySQL
+        	Connection connection = HandleConnection.getConnection();
+        	Statement sqlStatement = connection.createStatement();	
+        	
+			String sql = "";
+
+			if (badgeNumber != null) {
+				// Update vet
+				sql = "UPDATE user INNER JOIN account_detail on user.id = account_detail.id "
+						+ "SET login_name = \"" + user.getLoginName() + "\", login_password = \"" + user.getLoginPassword() + "\" "
+						+ "WHERE account_detail.badge_number = \"" + badgeNumber + "\"";
+				
+			} else if (confirmationCode != 0) {
+				// Update pet's owner
+				sql = "UPDATE user INNER JOIN account_detail on user.id = account_detail.id "
+						+ "SET login_name = \"" + user.getLoginName() + "\", login_password = \"" + user.getLoginPassword() + "\" "
+						+ "WHERE account_detail.confirmation_code = " + confirmationCode;
+			
+			} else {
+				// Return error response
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity("A required header was not specified for this request.").build();
+			}
+			
+			// Execute the SQL command
+    		int resultUpdate = sqlStatement.executeUpdate(sql);
+    		if (resultUpdate == 0) {
+    			// Query returns no result
+    			return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+    		}
+    		
+    		// Select the last modification record
+    		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM user WHERE modification_time = (SELECT max(modification_time) FROM user)");  
+    		ResultSet rs = stmt.executeQuery();  
+						
+			// Constructure JSON response
 			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
-			String jsonResponse = gson.toJson(user);
+			String jsonResponse = "";
+			
+			// Map result set returns from query to custom User class
+			JsonObject obj = new JsonObject();
+			int id = 0;
+			while (rs.next()) {
+				id = rs.getInt("id");
+				obj.addProperty("id", rs.getInt("id"));
+				obj.addProperty("username", rs.getString("login_name"));
+				
+				jsonResponse = gson.toJson(obj);
+			}
+
+			// Execute the SQL command
+			String sqlUpdateActive = "UPDATE account_detail SET active = 1 WHERE id = " + id;
+    		sqlStatement.executeUpdate(sqlUpdateActive);
+    		
+    		connection.close();
 
 			// Return successful response if no error
 			return Response.status(Response.Status.OK).entity(jsonResponse).build();

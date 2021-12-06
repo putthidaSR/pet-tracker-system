@@ -63,6 +63,11 @@ public class User {
 	@Column(name = "confirmation_code", table = "account_detail")
 	private int confirmationCode;
 	
+   // Default constructor
+   public User() {
+	   super();
+   }
+	
 	public User(int id, Date modificationTime, String role, String loginName, String badgeNumber, String email,
 			String phoneNumber, String address, boolean active) {
 		this.id = id;
