@@ -124,9 +124,6 @@ public class UserRegistration {
 		} catch (Exception e) {
 			// Return expected error response
 			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
-					.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Credentials", "true")
-					.header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-					.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
@@ -471,10 +468,12 @@ public class UserRegistration {
 	 *	}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the User was not found.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Path("/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUser(@PathParam("id") int id) {
+		
 		Session session = HibernateUtils.getSession();
 		Query query = session.createQuery("from User where id= :id and active = 'Y'");
 		List<User> userList = query.setParameter("id", id).list();
@@ -497,6 +496,7 @@ public class UserRegistration {
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
 	 */
+	@SuppressWarnings("rawtypes")
 	@Path("/{id}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)

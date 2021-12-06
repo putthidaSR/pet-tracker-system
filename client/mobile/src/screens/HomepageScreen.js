@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
 import { StyleSheet, TouchableOpacity, SafeAreaView, Text, View, ActivityIndicator, Dimensions, Image } from "react-native";
-import {USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE} from '../Configuration';
+import {USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE, USER_ROLE} from '../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class HomepageScreen extends Component {
@@ -124,13 +124,25 @@ export default class HomepageScreen extends Component {
           style={{width: 100, height: 70, resizeMode: 'contain'}}
           source={require('./../assets/images/paw.gif')}
         />
+        
+        {
+          this.state.userRole == USER_ROLE.PET_OWNER &&
+            <View style={styles.buttonContainer}>
+              {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
+              {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
+              {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
+              {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
+            </View>
+        }
 
-        <View style={styles.buttonContainer}>
-          {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
-          {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
-          {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
-          {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
-        </View>
+        {
+          this.state.userRole == USER_ROLE.VETERINARIAN &&
+            <View style={styles.buttonContainer}>
+              {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/pet-registration.png'))}
+              {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
+              {this.renderMenuOption("View All Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
+            </View>
+        }
 
       </SafeAreaView>
     );
