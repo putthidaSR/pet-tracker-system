@@ -17,8 +17,8 @@ export const REQUEST_URL_PREFIX = 'http://' + SERVER_IP_ADDRESS + '/PawTracker';
 export const REQUEST_URLS = {
 
   // Authentication-related
-  REGISTER: REQUEST_URL_PREFIX + '/users',
-  LOGIN: REQUEST_URL_PREFIX + '/users/login',
+  REGISTER: REQUEST_URL_PREFIX + '/users', // PUT
+  LOGIN: REQUEST_URL_PREFIX + '/users/login', // POST
 
-  ADD_PET_OWNER: REQUEST_URL_PREFIX + ''
+  ADD_PET_OWNER: REQUEST_URL_PREFIX + '/users/pet_owner' // POST
 };
