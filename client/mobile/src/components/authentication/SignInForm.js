@@ -133,7 +133,7 @@ export default class SignInForm extends Component {
 
         <View style={{width: Dimensions.get('window').width - 50, flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 30}}>
           <TouchableOpacity onPress={() => this.props.navigation.navigate('SignUpScreen')}>
-            <Text style={{color: '#0F2F44', backgroundColor: 'transparent', textDecorationLine: 'underline'}}>Create Account</Text>
+            <Text style={{color: '#0F2F44', backgroundColor: 'transparent', textDecorationLine: 'underline'}}>First Time Here? Create Account</Text>
           </TouchableOpacity>
         </View>
         

@@ -11,7 +11,7 @@ export const USER_ROLE = {
 };
 
 export const SERVER_IP_ADDRESS = 'localhost:8080';
-export const REQUEST_URL_PREFIX = 'http://' + SERVER_IP_ADDRESS;
+export const REQUEST_URL_PREFIX = 'http://' + SERVER_IP_ADDRESS + '/PawTracker';
 
 // List of URI endpoints used in the app
 export const REQUEST_URLS = {
