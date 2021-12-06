@@ -1,6 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
 import { StyleSheet, TouchableOpacity, SafeAreaView, Text, View, ActivityIndicator, Dimensions, Image } from "react-native";
+import {USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE} from '../Configuration';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class HomepageScreen extends Component {
   
@@ -8,10 +10,62 @@ export default class HomepageScreen extends Component {
     super(props);
       
     this.state = {
+      username: '',
+      userId: 0,
+      userRole: '',
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
   
+  componentDidMount() {
+    this.getCurrentUser();
+  }
+
+  /***************************************************************
+   * Get the info of the current logged-in user from app cache
+   ****************************************************************/
+  getCurrentUser = async () => {
+    try {
+
+      this.setState({isLoading: true});
+
+      // Retrieve username from app cache if exists
+      const userNameFromCache = await AsyncStorage.getItem(USER_NICKNAME_KEY_STORAGE);
+      if (userNameFromCache !== null) {
+        this.setState({username: userNameFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.username !== null) {
+          this.setState({username: this.props.route.params.username});
+        }
+      }
+
+      // Retrieve user ID from app cache if exists
+      const userIdFromCache = await AsyncStorage.getItem(USER_ID_KEY_STORAGE);
+      if (userIdFromCache !== null) {
+        this.setState({userId: userIdFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.id !== null) {
+          this.setState({userId: this.props.route.params.id});
+        }
+      } else {
+        // Prompt user to login again
+        this.props.navigation.navigate('SignInScreen');
+        return;
+      }
+
+      // Retrieve user role from app cache if exists
+      const userRoleFromCache = await AsyncStorage.getItem(USER_ROLE_KEY_STORAGE);
+      if (userRoleFromCache !== null) {
+        this.setState({userRole: userRoleFromCache});
+      }
+
+      this.setState({isLoading: false});
+
+    } catch (error) {
+      this.setState({isLoading: false});
+    }
+  }
+
   renderTitleView() {
     return (
       <View style={{marginTop: 30, height: TITLE_HEIGHT_VIEW - 80, width: Dimensions.get('window').width - 50, justifyContent: 'center', borderRadius: 30, alignSelf: 'center', 
