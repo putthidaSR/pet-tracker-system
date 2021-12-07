@@ -1,55 +1,52 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { SafeAreaView, Dimensions, StyleSheet, Text, TextInput, View, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, ActivityIndicator, Alert, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
+import {REQUEST_URLS} from '../../Configuration';
 import { Button } from 'react-native-elements';
 import axios from 'axios';
-import FormData from 'form-data';
 
-/**
- * This class represents the form register a new pet.
- * This component is only for authenticated user.
- */
-export default class PetRegistrationScreen extends Component {
+export default class UserRegistration extends Component {
   
   constructor(props) {
     super(props);
       
     this.state = {
-      petId: '',
-      petName: '',
-      petConfirmationNumber: '',
+      username: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
       isLoading: false // flag to indicate whether the screen is still loading
     };
-
-    this.registerPet = this.registerPet.bind(this);
   }
   
-  /*****************************************************
-   * Trigger the endpoint to call the backend server to
-   * add a pet to mobile device
-  *****************************************************/
-  async registerPet() {
+  /**
+   * Add pet's owner to the database.
+   */
+  handleUserRegistration = async () => {
 
-    const data = new FormData();
-    data.append('petId', this.state.petId);
-    data.append('petName', this.state.petName);
-    data.append('petConfirmationNumber', this.state.petConfirmationNumber);   
+    this.setState({isLoading: true});
 
     await axios({
-      url: '',
+      url: REQUEST_URLS.ADD_PET_OWNER,
       method: 'POST',
-      data: data
+      data: {
+        loginName: this.state.username,
+        loginPassword: '123456!', // random value (password will be overriden by user later)
+        email: this.state.email,
+        address: this.state.address,
+        phoneNumber: this.state.phoneNumber
+      }
     })
       .then(() => {
         this.setState({isLoading: false});
 
-        Alert.alert('Success', this.state.petName + ' has successfully added to the app.');
-        this.props.navigation.navigate('Home');
+        Alert.alert('Success', this.state.username + ' has been registered with the Paw Tracker system. User will receive a text message with instructions to setup an account.');
+        this.props.navigation.goBack();
       })
       .catch((error) => {
         this.setState({isLoading: false});
         Alert.alert('Error', error);
-        this.props.navigation.navigate('Home');
+        this.props.navigation.navigate('Homepage');
       });
   }
 
@@ -59,13 +56,13 @@ export default class PetRegistrationScreen extends Component {
   renderInputForm() {
     return (
       <View style={styles.formContainer}>
-
+        
         <View style={{padding: 20}} />
-        <Text style={styles.fieldTitleText}>Pet RFID Tag Number<Text style={{color: 'red'}}> *</Text></Text>
+        <Text style={styles.fieldTitleText}>Name<Text style={{color: 'red'}}> *</Text></Text>
         <TextInput
           style = {styles.input}
-          onChangeText = {(petId) => this.setState({petId})}
-          placeholder = "Enter Pet RFID Tag Number"
+          onChangeText = {(username) => this.setState({username})}
+          placeholder = "Enter username"
           placeholderTextColor = "gray"
           autoCapitalize = "none"
           autoCorrect = {false}
@@ -74,33 +71,48 @@ export default class PetRegistrationScreen extends Component {
           underlineColorAndroid = "#fff"
         />
 
-        <View style={{padding: 3}} />
-        <Text style={styles.fieldTitleText}>Pet Confirmation Number<Text style={{color: 'red'}}> *</Text></Text>
+        <View style={{padding: 5}} />
+        <Text style={styles.fieldTitleText}>Email<Text style={{color: 'red'}}> *</Text></Text>
         <TextInput
           style = {styles.input}
-          onChangeText = {(petId) => this.setState({petId})}
-          placeholder = "Enter the Confirmation Number"
+          onChangeText = {(email) => this.setState({email})}
+          placeholder = "Enter email"
           placeholderTextColor = "gray"
           autoCapitalize = "none"
           autoCorrect = {false}
           returnKeyType = "next"
-          onFocus = { () => this.setState({username: ''})}
+          onFocus = { () => this.setState({email: ''})}
           underlineColorAndroid = "#fff"
         />
 
-        <View style={{padding: 3}} />
-        <Text style={styles.fieldTitleText}>Pet Name<Text style={{color: 'red'}}> *</Text></Text>
+        <View style={{padding: 5}} />
+        <Text style={styles.fieldTitleText}>Phone Number<Text style={{color: 'red'}}> *</Text></Text>
         <TextInput
           style = {styles.input}
-          onChangeText = {(petId) => this.setState({petId})}
-          placeholder = "Enter Your Pet Name"
+          onChangeText = {(phoneNumber) => this.setState({phoneNumber})}
+          placeholder = "Enter phone number"
           placeholderTextColor = "gray"
           autoCapitalize = "none"
           autoCorrect = {false}
           returnKeyType = "next"
-          onFocus = { () => this.setState({username: ''})}
+          onFocus = { () => this.setState({phoneNumber: ''})}
           underlineColorAndroid = "#fff"
         />
+
+        <View style={{padding: 5}} />
+        <Text style={styles.fieldTitleText}>Address<Text style={{color: 'red'}}> *</Text></Text>
+        <TextInput
+          style = {styles.input}
+          onChangeText = {(address) => this.setState({address})}
+          placeholder = "Enter address"
+          placeholderTextColor = "gray"
+          autoCapitalize = "none"
+          autoCorrect = {false}
+          returnKeyType = "next"
+          onFocus = { () => this.setState({addres: ''})}
+          underlineColorAndroid = "#fff"
+        />
+
       </View>
     );
   }
@@ -108,10 +120,10 @@ export default class PetRegistrationScreen extends Component {
   /*****************************************************
    * Render button that will add the pet to mobile phone
   *****************************************************/
-  renderBottomView() {
+  renderRegisterButton() {
     return (
       <View style={{}}>
-        <Button type="solid" title=" Register My Pet "
+        <Button type="solid" title=" Register "
           titleStyle={{fontSize: 15, fontWeight: 'bold'}}
           containerStyle={{width: (Dimensions.get('window').width) - 50, alignSelf: 'center', marginTop: 20}}
           buttonStyle={{
@@ -121,33 +133,33 @@ export default class PetRegistrationScreen extends Component {
             backgroundColor: '#0F2F44',
             height: 50
           }}
-          onPress={this.registerPet} 
+          onPress={this.handleUserRegistration} 
         />
       </View>
     );
   }
-    
+
+
   render() {
-    
+
     // Display the spinning wheel to show that the app is still loading
     if (this.state.isLoading) {
       return (
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{textAlign: 'center'}}>{'\n'}The app is loading. Please wait...</Text>
+          <Text style={{textAlign: 'center'}}>{'\n'}Please wait...</Text>
         </View>
       );
     }
 
     return (
       <SafeAreaView style={styles.container}>
-
         <View style={{alignSelf: 'center', backgroundColor: '#F5C945', position: 'absolute', top: 0, left: 0, 
-          width: Dimensions.get('window').width, height: 300}} />
+          width: Dimensions.get('window').width, height: 50}} />
 
         {this.renderInputForm()}
 
-        {this.renderBottomView()}
+        {this.renderRegisterButton()}
 
       </SafeAreaView>
     );
@@ -158,7 +170,17 @@ export default class PetRegistrationScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  formContainer: {
+    //backgroundColor: '#EAF1FF',
+    alignSelf: 'center',
+    width: Dimensions.get('window').width - 40,
+    borderRadius: 30,
+    borderColor: '#EAF1FF', 
+    borderWidth: 5
   },
   fieldTitleText: {
     color: '#0F2F44', 
@@ -178,24 +200,6 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     paddingHorizontal: 20,
     borderRadius: 10
-  },
-  formContainer: {
-    backgroundColor: 'white',
-    alignSelf: 'center',
-    width: Dimensions.get('window').width - 40,
-    height: Dimensions.get('window').height / 2.2,
-    borderRadius: 35,
-    borderColor: '#fff', 
-    borderWidth: 5,
-    shadowOffset: {
-      width: 5,
-      height: 10
-    },
-    shadowColor: 'rgba(0,0,0,1)',
-    shadowOpacity: 0.73,
-    shadowRadius: 15,
-    elevation: 35,
-    marginTop: 60
   }
 });
 

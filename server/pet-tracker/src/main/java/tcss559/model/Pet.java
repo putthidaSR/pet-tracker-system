@@ -1,42 +1,47 @@
 package tcss559.model;
 
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+/**
+ * Model class represents the structure in pet table in the paw_tracker database.
+ */
 @Entity
 @Table(name = "pet")
 public class Pet {
 	
 	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
     private int id;
-	
-	@Column(name = "user_id")
-	private int userId;
 	
 	@Column(name = "rfid_number")
 	private String rfidNumber;
 	
-	@Column(name = "name")
-	private String name;
+	@Column(name = "registration_time")
+	private Date registrationTime;
 	
-	@Column(name = "category")
-	private String category;
+	@Column(name = "modification_time")
+	private Date modificationTime;
 	
-	@Column(name = "year")
-	private int year;
+	@ManyToOne
+    @JoinColumn(name = "user_id")
+	private User user;
 	
-	@Column(name = "create_time")
-	private Date createTime;
-	
-	@Column(name = "modify_time")
-	private Date modifyTime;
-	
-	@Column(name = "active")
-	private String active;
+	@OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<PetLocation> petLocations;
 
 	public int getId() {
 		return id;
@@ -44,14 +49,6 @@ public class Pet {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public void setUserId(int userId) {
-		this.userId = userId;
 	}
 
 	public String getRfidNumber() {
@@ -62,53 +59,36 @@ public class Pet {
 		this.rfidNumber = rfidNumber;
 	}
 
-	public String getName() {
-		return name;
+	public Date getRegistrationTime() {
+		return registrationTime;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setRegistrationTime(Date registrationTime) {
+		this.registrationTime = registrationTime;
 	}
 
-	public String getCategory() {
-		return category;
+	public Date getModificationTime() {
+		return modificationTime;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setModificationTime(Date modificationTime) {
+		this.modificationTime = modificationTime;
 	}
 
-	public int getYear() {
-		return year;
+	public User getUser() {
+		return user;
 	}
 
-	public void setYear(int year) {
-		this.year = year;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public Date getCreateTime() {
-		return createTime;
+	public Set<PetLocation> getPetLocations() {
+		return petLocations;
 	}
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
+	public void setPetLocations(Set<PetLocation> petLocations) {
+		this.petLocations = petLocations;
 	}
-
-	public Date getModifyTime() {
-		return modifyTime;
-	}
-
-	public void setModifyTime(Date modifyTime) {
-		this.modifyTime = modifyTime;
-	}
-
-	public String getActive() {
-		return active;
-	}
-
-	public void setActive(String active) {
-		this.active = active;
-	}
-
 	
 }

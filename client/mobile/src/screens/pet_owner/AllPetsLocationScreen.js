@@ -4,7 +4,7 @@ import React, { Component } from "react";
 import { StyleSheet, Alert, Text, View, ActivityIndicator, Image, TouchableHighlight, Dimensions } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
-import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
+import NavigateBetweenTwoRoutes from '../../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
@@ -138,7 +138,7 @@ export default class PetLocationScreen extends Component {
 
           <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{item.name}</Text>
 
-          <Image style={{width: 40, height: 40}} source={require('./../assets/images/paw.png')} />
+          <Image style={{width: 40, height: 40}} source={require('./../../assets/images/paw.png')} />
         </View>
 
         <View style={{alignItems: 'center', paddingTop: 5}}>
@@ -232,7 +232,7 @@ export default class PetLocationScreen extends Component {
                 ref={ref => {this.state.markers[index] = ref; }}
                 onPress={() => this.onMarkerPressed(marker, index)}
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                image={require('./../assets/images/paw.png')}
+                image={require('./../../assets/images/paw.png')}
               >
                 <Callout>
                   <View style={{width: 250, height: 200}}>

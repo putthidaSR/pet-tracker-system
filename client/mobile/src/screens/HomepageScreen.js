@@ -1,6 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
 import { StyleSheet, TouchableOpacity, SafeAreaView, Text, View, ActivityIndicator, Dimensions, Image } from "react-native";
+import {USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE, USER_ROLE} from '../Configuration';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class HomepageScreen extends Component {
   
@@ -8,10 +10,62 @@ export default class HomepageScreen extends Component {
     super(props);
       
     this.state = {
+      username: '',
+      userId: 0,
+      userRole: '',
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
   
+  componentDidMount() {
+    this.getCurrentUser();
+  }
+
+  /***************************************************************
+   * Get the info of the current logged-in user from app cache
+   ****************************************************************/
+  getCurrentUser = async () => {
+    try {
+
+      this.setState({isLoading: true});
+
+      // Retrieve username from app cache if exists
+      const userNameFromCache = await AsyncStorage.getItem(USER_NICKNAME_KEY_STORAGE);
+      if (userNameFromCache !== null) {
+        this.setState({username: userNameFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.username !== null) {
+          this.setState({username: this.props.route.params.username});
+        }
+      }
+
+      // Retrieve user ID from app cache if exists
+      const userIdFromCache = await AsyncStorage.getItem(USER_ID_KEY_STORAGE);
+      if (userIdFromCache !== null) {
+        this.setState({userId: userIdFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.id !== null) {
+          this.setState({userId: this.props.route.params.id});
+        }
+      } else {
+        // Prompt user to login again
+        this.props.navigation.navigate('SignInScreen');
+        return;
+      }
+
+      // Retrieve user role from app cache if exists
+      const userRoleFromCache = await AsyncStorage.getItem(USER_ROLE_KEY_STORAGE);
+      if (userRoleFromCache !== null) {
+        this.setState({userRole: userRoleFromCache});
+      }
+
+      this.setState({isLoading: false});
+
+    } catch (error) {
+      this.setState({isLoading: false});
+    }
+  }
+
   renderTitleView() {
     return (
       <View style={{marginTop: 30, height: TITLE_HEIGHT_VIEW - 80, width: Dimensions.get('window').width - 50, justifyContent: 'center', borderRadius: 30, alignSelf: 'center', 
@@ -23,7 +77,7 @@ export default class HomepageScreen extends Component {
             style={{width: 100, height: 100, resizeMode: 'contain'}}
             source={require('./../assets/images/app-logo.png')}
           />
-          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the pet community!</Text>
+          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the largest paw community!</Text>
         </View>
       </View>
     );
@@ -70,13 +124,24 @@ export default class HomepageScreen extends Component {
           style={{width: 100, height: 70, resizeMode: 'contain'}}
           source={require('./../assets/images/paw.gif')}
         />
+        
+        {
+          this.state.userRole == USER_ROLE.PET_OWNER &&
+            <View style={styles.buttonContainer}>
+              {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
+              {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
+              {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
+            </View>
+        }
 
-        <View style={styles.buttonContainer}>
-          {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
-          {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
-          {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
-          {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
-        </View>
+        {
+          this.state.userRole == USER_ROLE.VETERINARIAN &&
+            <View style={styles.buttonContainer}>
+              {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/user-add.png'))}
+              {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
+              {this.renderMenuOption("View All Pets", 'ViewAllPets', require('./../assets/images/view-pets.png'))}
+            </View>
+        }
 
       </SafeAreaView>
     );

@@ -27,7 +27,7 @@ import tcss559.model.PetLocation;
 import tcss559.model.User;
 
 
-@Path("/pets")
+@Path("/location")
 public class LocationProvider {
 
 	/**

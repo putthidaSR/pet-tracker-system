@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { StyleSheet, SafeAreaView, Text, ScrollView, Image, View, Alert, Dimensions, ActivityIndicator } from "react-native";
 import axios from 'axios';
-import {USER_KEY_STORAGE} from '../Configuration';
+import {USER_KEY_STORAGE} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Button } from 'react-native-elements';
 import moment from 'moment';
@@ -99,7 +99,7 @@ export default class ViewMyPetsScreen extends Component {
       
               {/* display pet name */}
               <View style={{flexDirection: 'row', width: Dimensions.get('window').width - 100}}>
-                <Image style={{width: 50, height: 50}} source={require('./../assets/images/paw.gif')} />
+                <Image style={{width: 50, height: 50}} source={require('./../../assets/images/paw.gif')} />
                 <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 'bold', marginTop: 10}}>{data.petName}</Text>
               </View>
               

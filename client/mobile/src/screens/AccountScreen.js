@@ -37,7 +37,7 @@ export default class AccountScreen extends Component {
             height: 55,
             backgroundColor: '#0F2F44'
           }}
-          onPress={() => this.props.navigation.navigate('Authentication')}
+          onPress={() => this.props.navigation.navigate('SignInScreen')}
         />
       </View>
     );

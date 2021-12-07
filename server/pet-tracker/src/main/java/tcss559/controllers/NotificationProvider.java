@@ -10,9 +10,19 @@
 
 package tcss559.controllers;
 
+import javax.mail.MessagingException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
+
+import tcss559.model.EmailDTO;
+import tcss559.utilities.EmailService;
 
 @Path("/notification")
 public class NotificationProvider {
@@ -49,6 +59,33 @@ public class NotificationProvider {
 			throw new Exception(
 					"Failed to send SMS to the specified number. Error Message: " + e.getLocalizedMessage());
 		}
+	}
+	
+	/**
+	 * @api {POST} /sendEmail Send email service
+	 * @apiName sendEmail
+	 * @apiGroup EmailService
+	 *
+	 * @apiParam {String} recipient Email recipient.
+	 * @apiParam {String} subject Email subject.
+	 * @apiParam {String} content Email content.
+	 *
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * @apiError(Error 503) ServiceError The intern service cause a error.
+	 */
+	@Path("/email")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendEmailE(EmailDTO email){
+		try {
+			EmailService.gmailSender(email.getRecipient(), email.getSubject(), email.getContent());
+		} catch (MessagingException e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("FAILURE").build();
+		}
+        return Response.status(Response.Status.OK).entity("SUCCESS").build();
 	}
 	
 }
