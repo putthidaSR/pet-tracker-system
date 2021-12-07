@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,8 +31,8 @@ public class PetVaccination {
     @JoinColumn(name = "pet_id")
 	private Pet pet;
 	
-	@OneToMany(mappedBy = "pet_vaccination", cascade = CascadeType.ALL)
-	private Set<PetVaccinationDetail> vaccinationDetails;
+	@OneToMany(mappedBy = "petVaccination", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<PetVaccinationDetail> petVaccinationDetails;
 	
 	@Column(name = "creation_time")
 	private Date creationTime;
@@ -39,12 +40,12 @@ public class PetVaccination {
 	@Column(name = "modification_time")
 	private Date modificationTime;
 
-	public Set<PetVaccinationDetail> getVaccinationDetails() {
-		return vaccinationDetails;
+	public Set<PetVaccinationDetail> getPetVaccinationDetails() {
+		return petVaccinationDetails;
 	}
 
-	public void setVaccinationDetails(Set<PetVaccinationDetail> vaccinationDetails) {
-		this.vaccinationDetails = vaccinationDetails;
+	public void setPetVaccinationDetails(Set<PetVaccinationDetail> petVaccinationDetails) {
+		this.petVaccinationDetails = petVaccinationDetails;
 	}
 	
 	public int getId() {

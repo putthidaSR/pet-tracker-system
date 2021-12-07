@@ -109,6 +109,11 @@ public class PetRegistration {
 		}
 	}
 	
+	/**
+	 * Only active vet can view all pets.
+	 * @param badgeNumber
+	 * @return
+	 */
 	@Path("/")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -137,7 +142,7 @@ public class PetRegistration {
 		try {
 			
 			Session session = HibernateUtils.getSession();
-			Query query = session.createQuery("from Pet where id= :id and active = 'Y'");
+			Query query = session.createQuery("from Pet where id= :id");
 			List<Pet> petList = query.setParameter("id", petId).list();
 	        session.close();
 	        if (petList.isEmpty()) {

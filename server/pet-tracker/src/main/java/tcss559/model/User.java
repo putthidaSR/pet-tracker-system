@@ -64,7 +64,7 @@ public class User {
 	@Column(name = "confirmation_code", table = "account_detail")
 	private int confirmationCode;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Pet> pets;
 	
     // Default constructor
@@ -89,10 +89,24 @@ public class User {
 		this.active = active;
 	}
 	
+
+	
+	public User(int id, String role, int confirmationCode, String email, String phoneNumber, String address,
+			boolean active) {
+		this.id = id;
+		this.role = role;
+		this.confirmationCode = confirmationCode;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
+		this.address = address;
+		this.active = active;
+	}
+
+	
 	/*
 	 * Getters and Settings methods
 	 */
-
+	
 	public int getId() {
 		return id;
 	}

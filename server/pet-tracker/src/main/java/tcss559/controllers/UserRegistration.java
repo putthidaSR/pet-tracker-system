@@ -11,15 +11,12 @@ import java.util.Random;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -28,7 +25,6 @@ import org.hibernate.query.Query;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import tcss559.hibernate.HibernateUtils;
@@ -44,6 +40,262 @@ public class UserRegistration {
 	public Response test() {
 		return Response.status(Response.Status.OK).entity("Success").build();
 	}
+	
+	/**
+	 * Register pet owner by inserting a record to MySQL database.
+	 * 
+	 * @api {POST} /users/pet_owner Register user to the system
+	 * @apiName RegisterPetOwner
+	 * @apiGroup UserRegistration
+	 *
+	 * @apiParam {String} loginName  User's login name.
+	 * @apiParam {String} loginPassword User's login password.
+	 * @apiParam {String} email User's email.
+	 * @apiParam {String} phoneNumber User's phone number.
+	 * @apiParam {String} address User's address.
+	 * @apiParamExample {json} Request Body - Example:
+	 *		{
+	 *			"loginName": "user_master",
+     *			"loginPassword": "123456!",
+     *			"email": "user_master@uw.edu",
+     *			"phoneNumber": "2067966856",
+     *			"address": "3456 S Pacific Ave, Tacoma, WA, 98404"
+	 *     	}
+	 *     
+	 * @apiSuccess {Number} id  Users unique ID.
+	 * @apiSuccess {Number} active Status to identify if the veterinarian has already created an account on the mobile app.
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *		{
+	 *		    "id": 7,
+	 *		    "creationTime": "Dec 5, 2021, 5:13:03 PM",
+	 *		    "modificationTime": "Dec 5, 2021, 5:13:03 PM",
+	 *		    "loginName": "user_master",
+	 *		    "loginPassword": "123456!",
+	 *		    "role": "PetOwner",
+	 *		    "email": "user_master@uw.edu",
+	 *		    "phoneNumber": "2067966856",
+	 *		    "address": "3456 S Pacific Ave, Tacoma, WA, 98404"
+	 *		    "active": false,
+	 *		    "confirmationCode": 0
+	 *		}
+	 */
+	@Path("/pet_owner")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response RegisterPetOwner(User user) {
+		
+		try {
+			
+			// Obtain the session
+			Session session = HibernateUtils.getSession();
+			Transaction t = session.beginTransaction();
+			
+			// Update User entity
+			user.setCreationTime(new Date());
+			user.setModificationTime(new Date());
+			user.setRole(User.ROLE_PET_OWNER);
+			
+			// Persist User entity
+			session.save(user);
+
+			/*
+			 * Set random generated number as confirmation code to be sent to user's phone as text message.
+			 * This feature only applies to Pet Owner role.
+			 */
+			Random random = new Random();
+			int confirmationCode = random.ints(1000, 9999).findFirst().getAsInt();
+			
+			// Generate unique code by placing user ID in front (since user ID is primary key, it is auto-incremented and unique)
+			int uniqueCode = Integer.valueOf(String.valueOf(user.getId()) + String.valueOf(confirmationCode));
+			user.setConfirmationCode(uniqueCode);
+			
+			if (user.getPhoneNumber() != null) {
+				
+				// Send text message to user with the confirmation code. Pet owner must use this confirmation code to login with the app
+				NotificationProvider.sendSMS(user.getPhoneNumber(),
+						"Your account has been registered with PawTracker. You can now login to the app with this confimation code: "
+								+ uniqueCode);
+			}
+			
+			// Persist the User entity and close the session
+			session.save(user);
+			t.commit();
+	        session.close();
+			
+			// Constructure JSON response from Java object
+	        Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+	        String jsonResponse = gson.toJson(user);
+
+			// Return successful response if no error
+			return Response.status(Response.Status.OK)
+					.entity(jsonResponse)
+					.build();
+						
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	/**
+	 * Returns all pet owners.
+	 * @param badgeNumber
+	 * @return
+	 * 
+	 * 
+	 * {
+	    "result": [
+	        {
+	            "user_id": 6,
+	            "username": "thida"
+	        },
+	        {
+	            "user_id": 7,
+	            "username": "psamrith"
+	        },
+	        {
+	            "user_id": 10,
+	            "username": "app_user1"
+	        },
+	        {
+	            "user_id": 11,
+	            "username": "psamrith2"
+	        },
+	        {
+	            "user_id": 12,
+	            "username": "test1"
+	        }
+	    ]
+		}
+	 */
+	
+	@Path("/pet_owner")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllPetOwners() {
+				
+		try { 
+			
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+        	// Construct the query to return matching record
+    		PreparedStatement stmt = connection.prepareStatement("SELECT u.id AS user_id, role, login_name FROM user u, account_detail ad WHERE u.id = ad.id AND ad.role = ? ");
+    		stmt.setString(1, User.ROLE_PET_OWNER);
+
+    		// Execute SQL query
+    		ResultSet rs = stmt.executeQuery();  
+    		
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			
+			JsonArray arr = new JsonArray();
+			
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+				
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("user_id", rs.getInt("user_id"));
+				eachElement.addProperty("username", rs.getString("login_name"));
+				
+				arr.add(eachElement);
+			}	
+			
+			JsonObject obj = new JsonObject();
+			obj.add("result", arr);
+			
+			jsonResponse = gson.toJson(obj);
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+
+			connection.close();
+
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to update a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	/**
+	 * 
+	 * {
+    "id": 7,
+    "role": "PetOwner",
+    "email": "test111@uw.edu",
+    "phoneNumber": "2065966256",
+    "active": true,
+    "confirmationCode": 1215
+}
+
+	 * @param userId
+	 * @return
+	 */
+	@Path("/pet_owner/{id}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getOnePetOwner(@PathParam("id") int userId) {
+		
+		try { 
+			
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+        	// Construct the query to return matching record
+    		PreparedStatement stmt = connection.prepareStatement("select * from account_detail where id = ? and account_detail.role = ?");
+    		stmt.setInt(1, userId);
+    		stmt.setString(2, User.ROLE_PET_OWNER);
+
+    		// Execute SQL query
+    		ResultSet rs = stmt.executeQuery();  
+    		
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			
+			boolean hasRecord = false;
+
+			// Map result set returns from query to custom User class
+			while (rs.next()) {
+				hasRecord = true;
+
+				User user = new User(rs.getInt("id"), rs.getString("role"),
+						rs.getInt("confirmation_code"), rs.getString("email"),
+						rs.getString("phone_number"), rs.getString("address"), rs.getBoolean("active"));
+				jsonResponse = gson.toJson(user);
+			}
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+
+			connection.close();
+
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to update a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
 	
 	/**
 	 * Register veterinarian to the system.
@@ -141,115 +393,32 @@ public class UserRegistration {
 		}
 	}
 	
-	/**
-	 * Register pet owner by inserting a record to MySQL database.
-	 * 
-	 * @api {POST} /users/pet_owner Register user to the system
-	 * @apiName RegisterUser
-	 * @apiGroup UserRegistration
-	 *
-	 * @apiParam {String} loginName  User's login name.
-	 * @apiParam {String} loginPassword User's login password.
-	 * @apiParam {String} email User's email.
-	 * @apiParam {String} phoneNumber User's phone number.
-	 * @apiParam {String} address User's address.
-	 * @apiParamExample {json} Request Body - Example:
-	 *		{
-	 *			"loginName": "user_master",
-     *			"loginPassword": "123456!",
-     *			"email": "user_master@uw.edu",
-     *			"phoneNumber": "2067966856",
-     *			"address": "3456 S Pacific Ave, Tacoma, WA, 98404"
-	 *     	}
-	 *     
-	 * @apiSuccess {Number} id  Users unique ID.
-	 * @apiSuccess {Number} active Status to identify if the veterinarian has already created an account on the mobile app.
-	 * @apiSuccessExample {json} Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *		{
-	 *		    "id": 7,
-	 *		    "creationTime": "Dec 5, 2021, 5:13:03 PM",
-	 *		    "modificationTime": "Dec 5, 2021, 5:13:03 PM",
-	 *		    "loginName": "user_master",
-	 *		    "loginPassword": "123456!",
-	 *		    "role": "PetOwner",
-	 *		    "email": "user_master@uw.edu",
-	 *		    "phoneNumber": "2067966856",
-	 *		    "address": "3456 S Pacific Ave, Tacoma, WA, 98404"
-	 *		    "active": false,
-	 *		    "confirmationCode": 0
-	 *		}
-	 */
-	@Path("/pet_owner")
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response RegisterUser(User user) {
-		
-		try {
-			
-			// Obtain the session
-			Session session = HibernateUtils.getSession();
-			Transaction t = session.beginTransaction();
-			
-			// Update User entity
-			user.setCreationTime(new Date());
-			user.setModificationTime(new Date());
-			user.setRole(User.ROLE_PET_OWNER);
-			
-			// Persist User entity
-			session.save(user);
-
-			/*
-			 * Set random generated number as confirmation code to be sent to user's phone as text message.
-			 * This feature only applies to Pet Owner role.
-			 */
-			Random random = new Random();
-			int confirmationCode = random.ints(1000, 9999).findFirst().getAsInt();
-			
-			// Generate unique code by placing user ID in front (since user ID is primary key, it is auto-incremented and unique)
-			int uniqueCode = Integer.valueOf(String.valueOf(user.getId()) + String.valueOf(confirmationCode));
-			user.setConfirmationCode(uniqueCode);
-			
-			if (user.getPhoneNumber() != null) {
-				
-				// Send text message to user with the confirmation code. Pet owner must use this confirmation code to login with the app
-				NotificationProvider.sendSMS(user.getPhoneNumber(),
-						"Your account has been registered with PawTracker. You can now login to the app with this confimation code: "
-								+ uniqueCode);
-			}
-			
-			// Persist the User entity and close the session
-			session.save(user);
-			t.commit();
-	        session.close();
-			
-			// Constructure JSON response from Java object
-	        Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
-	        String jsonResponse = gson.toJson(user);
-
-			// Return successful response if no error
-			return Response.status(Response.Status.OK)
-					.entity(jsonResponse)
-					.build();
-						
-		} catch (Exception e) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
-					.entity("Error Message: " + e.getLocalizedMessage()).build();
-		}
-	}
 	
 	/**
-	 * Check if the specified account exists in the system. If yes, returns the account detail.
+	 * Check if the specified vet account exists in the system. If yes, returns the account detail.
 	 * @param badgeNumber
+	 * 
+	 * 
+	 * {
+    "id": 8,
+    "modificationTime": "Dec 6, 2021",
+    "loginName": "new_vet",
+    "role": "Veterinarian",
+    "badgeNumber": "3456607B",
+    "email": "vet_master@uw.edu",
+    "phoneNumber": "2067966856",
+    "address": "3456 S Pacific Ave, Tacoma, WA, 98404",
+    "active": true,
+    "confirmationCode": 0
+}
+
 	 * @return
 	 */
-	@Path("/")
+	@Path("/vet/{badge_number}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getUserAccountDetail(@PathParam("badge_number") String badgeNumber) {
+	public Response getVeterinarian(@PathParam("badge_number") String badgeNumber) {
 				
 		try { 
 			
@@ -267,103 +436,17 @@ public class UserRegistration {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
 			String jsonResponse = "";
 
-			// Query returns no result
-			if (!rs.next()) {
-				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
-			}
-			
+			boolean hasRecord = false;
+
 			// Map result set returns from query to custom User class
 			while (rs.next()) {
+				hasRecord = true;
+
 				User user = new User(rs.getInt("user_id"), rs.getDate("modification_time"), rs.getString("role"),
 						rs.getString("login_name"), rs.getString("badge_number"), rs.getString("email"),
 						rs.getString("phone_number"), rs.getString("address"), rs.getBoolean("active"));
 				jsonResponse = gson.toJson(user);
 			}
-
-			connection.close();
-			
-			// Return successful response if no error
-			return Response.status(Response.Status.OK).entity(jsonResponse).build();
-
-		} catch (Exception e) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to update a record")
-					.entity("Error Message: " + e.getLocalizedMessage()).build();
-		}
-	}
-	
-	/**
-	 * Returns all pet owners.
-	 * @param badgeNumber
-	 * @return
-	 * 
-	 * 
-	 * {
-	    "result": [
-	        {
-	            "user_id": 6,
-	            "username": "thida"
-	        },
-	        {
-	            "user_id": 7,
-	            "username": "psamrith"
-	        },
-	        {
-	            "user_id": 10,
-	            "username": "app_user1"
-	        },
-	        {
-	            "user_id": 11,
-	            "username": "psamrith2"
-	        },
-	        {
-	            "user_id": 12,
-	            "username": "test1"
-	        }
-	    ]
-		}
-	 */
-	
-	@Path("/pet_owner")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllPetOwners() {
-				
-		try { 
-			
-			// Establish connection to MySQL server
-        	Connection connection = HandleConnection.getConnection();
-        	
-        	// Construct the query to return matching record
-    		PreparedStatement stmt = connection.prepareStatement("SELECT u.id AS user_id, role, login_name FROM user u, account_detail ad WHERE u.id = ad.id AND ad.role = ? ");
-    		stmt.setString(1, User.ROLE_PET_OWNER);
-
-    		// Execute SQL query
-    		ResultSet rs = stmt.executeQuery();  
-    		
-			// Display function to show the Resultset
-			// Constructure JSON response
-			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
-			String jsonResponse = "";
-			
-			JsonArray arr = new JsonArray();
-			
-			// Map result set returns from query
-			boolean hasRecord = false;
-			while (rs.next()) {
-				hasRecord = true;
-				
-				JsonObject eachElement = new JsonObject();
-				eachElement.addProperty("user_id", rs.getInt("user_id"));
-				eachElement.addProperty("username", rs.getString("login_name"));
-				
-				arr.add(eachElement);
-			}	
-			
-			JsonObject obj = new JsonObject();
-			obj.add("result", arr);
-			
-			jsonResponse = gson.toJson(obj);
 
 			// Query returns no result
 			if (!hasRecord) {
@@ -371,7 +454,7 @@ public class UserRegistration {
 			}
 
 			connection.close();
-
+			
 			// Return successful response if no error
 			return Response.status(Response.Status.OK).entity(jsonResponse).build();
 
