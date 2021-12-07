@@ -34,15 +34,28 @@ public class AuthenticationProvider {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response AccountLogin(User user) {
+	public Response AccountLogin(@HeaderParam("user_role") String role, User user) {
 		
 		try {
 
 			// Establish connection to MySQL server
         	Connection connection = HandleConnection.getConnection();
         	
-        	// Construct the query to return matching record
-    		PreparedStatement stmt = connection.prepareStatement("select * from user where login_name = ? and login_password = ?");
+        	// Construct the query to return matching record based on user role
+        	String sql = "";
+        	boolean isLoggedInAsVeterinarian = false;
+        	
+        	if (role.equalsIgnoreCase(User.ROLE_VETERINARIAN)) {
+        		isLoggedInAsVeterinarian = true;
+        		sql = "select user.id, user.login_name, ad.badge_number from user, account_detail ad where login_name = ? and login_password = ? and user.id = ad.id";
+        	
+        	} else {
+        		// assume pet_owner by default if not specify
+        		sql = "select * from user where login_name = ? and login_password = ?";
+        		
+        	}
+    		
+        	PreparedStatement stmt = connection.prepareStatement(sql);
     		stmt.setString(1, user.getLoginName());
     		stmt.setString(2, user.getLoginPassword());
     		
@@ -62,6 +75,9 @@ public class AuthenticationProvider {
 				obj.addProperty("id", rs.getInt("id"));
 				obj.addProperty("username", rs.getString("login_name"));
 				
+				if (isLoggedInAsVeterinarian) {
+					obj.addProperty("badgeNumber", rs.getString("badge_number"));
+				}
 				jsonResponse = gson.toJson(obj);
 			}
 			

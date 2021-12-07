@@ -3,7 +3,7 @@ import React, { Component } from 'react'	;
 import { StyleSheet, SafeAreaView, Text, Alert, TextInput, ActivityIndicator, TouchableOpacity, View, Dimensions } from 'react-native';
 import axios from 'axios';
 import { ButtonGroup } from 'react-native-elements';
-import {REQUEST_URLS, USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE, USER_ROLE} from '../../Configuration';
+import {REQUEST_URLS, USER_ID_KEY_STORAGE, USER_BADGE_NUMBER_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE, USER_ROLE} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**************************************************************************************
@@ -39,8 +39,10 @@ export default class SignInForm extends Component {
       );
       return;
     }
-
+    
     this.setState({isLoading: true});
+    var headerVal = this.state.userRole === 0 ? USER_ROLE.PET_OWNER : USER_ROLE.VETERINARIAN;
+    console.log(headerVal);
 
     try {
 
@@ -50,17 +52,25 @@ export default class SignInForm extends Component {
         data: {
           loginName: this.state.username,
           loginPassword: this.state.password
+        },
+        headers: {
+          user_role: `${headerVal}`
         }
       });
       this.setState({isLoading: false});
 
-      console.log('Successfully login!', response);
+      console.log('Successfully login!', response.data);
 
       // Save data to app cache
       try {
         await AsyncStorage.setItem(USER_NICKNAME_KEY_STORAGE, this.state.username);
         await AsyncStorage.setItem(USER_ID_KEY_STORAGE, response.data.id.toString());
         await AsyncStorage.setItem(USER_ROLE_KEY_STORAGE, this.state.userRole === 0 ? USER_ROLE.PET_OWNER : USER_ROLE.VETERINARIAN);
+
+        if (this.state.userRole === 1) {
+          await AsyncStorage.setItem(USER_BADGE_NUMBER_STORAGE, response.data.badgeNumber);
+        }
+
       } catch (error) {
         //console.log('error saving data to app cache');
       }

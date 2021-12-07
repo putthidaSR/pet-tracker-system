@@ -99,7 +99,7 @@ export default class ViewMyPetsScreen extends Component {
       
               {/* display pet name */}
               <View style={{flexDirection: 'row', width: Dimensions.get('window').width - 100}}>
-                <Image style={{width: 50, height: 50}} source={require('./../assets/images/paw.gif')} />
+                <Image style={{width: 50, height: 50}} source={require('./../../assets/images/paw.gif')} />
                 <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 'bold', marginTop: 10}}>{data.petName}</Text>
               </View>
               

@@ -1,9 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, ActivityIndicator, Alert, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
-import {REQUEST_URLS} from '../../Configuration';
+import { StyleSheet, ActivityIndicator, Alert, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
+import {REQUEST_URLS, USER_BADGE_NUMBER_STORAGE} from '../../Configuration';
 import { Button } from 'react-native-elements';
 import axios from 'axios';
+import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class ViewAllPets extends Component {
   
@@ -15,33 +17,49 @@ export default class ViewAllPets extends Component {
       email: '',
       phoneNumber: '',
       address: '',
+      badgeNumber: '',
+
+      tableHeader: ['Head', 'Head2', 'Head3', 'Head4'],
+      tableData: [],
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
   
   /**
-   * Add pet's owner to the database.
+   * Get initial data
    */
-  handleUserRegistration = async () => {
+  componentDidMount() {
+    this.getAllPetsWithDetails();
+  }
+
+  /**
+   * Retrieve all pets with details from database.
+   */
+  getAllPetsWithDetails = async () => {
 
     this.setState({isLoading: true});
 
+    try {
+      // Retrieve username from app cache if exists
+      const badgeNumberFromCache = await AsyncStorage.getItem(USER_BADGE_NUMBER_STORAGE);
+      if (badgeNumberFromCache !== null) {
+        this.setState({badgeNumber: badgeNumberFromCache});
+      }
+    } catch (error) {
+      // ignore error here (won't have any effect)
+    }
+
+    console.log(this.state.badgeNumber);
     await axios({
-      url: REQUEST_URLS.ADD_PET_OWNER,
-      method: 'POST',
-      data: {
-        loginName: this.state.username,
-        loginPassword: '123456!', // random value (password will be overriden by user later)
-        email: this.state.email,
-        address: this.state.address,
-        phoneNumber: this.state.phoneNumber
+      url: REQUEST_URLS.VIEW_ALL_PETS_DETAILS,
+      method: 'GET',
+      headers: {
+        badge_number: `${this.state.badgeNumber}`
       }
     })
-      .then(() => {
+      .then((response) => {
         this.setState({isLoading: false});
-
-        Alert.alert('Success', this.state.username + ' has been registered with the Paw Tracker system. User will receive a text message with instructions to setup an account.');
-        this.props.navigation.goBack();
+        console.log(response.data);
       })
       .catch((error) => {
         this.setState({isLoading: false});

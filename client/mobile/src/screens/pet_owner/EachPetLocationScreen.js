@@ -146,7 +146,7 @@ export default class PetLocationScreen extends Component {
           <Marker
             draggable
             coordinate={{ latitude: 47.244316, longitude: -122.437031}}
-            image={require('./../assets/images/user.png')}
+            image={require('./../../assets/images/user.png')}
             title="Your Destination"
           />
           
@@ -158,7 +158,7 @@ export default class PetLocationScreen extends Component {
                 ref={ref => {this.state.markers[index] = ref; }}
                 onPress={() => this.onMarkerPressed(marker, index)}
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                image={require('./../assets/images/pet-location.png')}
+                image={require('./../../assets/images/pet-location.png')}
               >
                 <Callout>
                   <View style={{width: 250, height: 150, padding: 5}}>

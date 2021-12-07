@@ -102,7 +102,7 @@ export default class SignUpForm extends Component {
       // Navigate to sign-in screen so that user can sign up with the newly created credentials
       console.log('Successfully sign up!');
       Alert.alert('Success', 'Please login with the account you just created');
-      this.props.navigation.navigate('SignInScreen');
+      this.props.navigation.goBack();
 
     } catch (error) {
 
@@ -210,7 +210,7 @@ export default class SignUpForm extends Component {
         </TouchableOpacity>
         
         <View style={{padding: 15, alignItems: 'center'}}>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('SignInScreen')}>
+          <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
             <Text style={styles.textLink}>Already has an account?</Text>
           </TouchableOpacity>
         </View>

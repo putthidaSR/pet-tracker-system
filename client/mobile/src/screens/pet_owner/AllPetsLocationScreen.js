@@ -138,7 +138,7 @@ export default class PetLocationScreen extends Component {
 
           <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{item.name}</Text>
 
-          <Image style={{width: 40, height: 40}} source={require('./../assets/images/paw.png')} />
+          <Image style={{width: 40, height: 40}} source={require('./../../assets/images/paw.png')} />
         </View>
 
         <View style={{alignItems: 'center', paddingTop: 5}}>
@@ -232,7 +232,7 @@ export default class PetLocationScreen extends Component {
                 ref={ref => {this.state.markers[index] = ref; }}
                 onPress={() => this.onMarkerPressed(marker, index)}
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                image={require('./../assets/images/paw.png')}
+                image={require('./../../assets/images/paw.png')}
               >
                 <Callout>
                   <View style={{width: 250, height: 200}}>

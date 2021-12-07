@@ -20,6 +20,8 @@ import UserRegistration from '../screens/veterinarian/UserRegistration';
 import PetRegistrationScreen from '../screens/veterinarian/PetRegistrationScreen';
 import ViewAllPets from '../screens/veterinarian/ViewAllPets';
 
+import AuthenticationRouter from './AuthenticationRouter';
+
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
  */
@@ -200,7 +202,9 @@ function HomepageStack() {
         )
       })} />
 
-        
+
+      <Stack.Screen name="Authentication" component={AuthenticationRouter} />
+
     </Stack.Navigator>
   );
 }
