@@ -77,7 +77,7 @@ export default class HomepageScreen extends Component {
             style={{width: 100, height: 100, resizeMode: 'contain'}}
             source={require('./../assets/images/app-logo.png')}
           />
-          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the pet community!</Text>
+          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the largest paw community!</Text>
         </View>
       </View>
     );
@@ -128,7 +128,6 @@ export default class HomepageScreen extends Component {
         {
           this.state.userRole == USER_ROLE.PET_OWNER &&
             <View style={styles.buttonContainer}>
-              {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
               {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
               {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
               {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))} 
@@ -138,7 +137,7 @@ export default class HomepageScreen extends Component {
         {
           this.state.userRole == USER_ROLE.VETERINARIAN &&
             <View style={styles.buttonContainer}>
-              {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/pet-registration.png'))}
+              {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/user-add.png'))}
               {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
               {this.renderMenuOption("View All Pets", 'ViewAllPets', require('./../assets/images/view-pets.png'))}
             </View>
