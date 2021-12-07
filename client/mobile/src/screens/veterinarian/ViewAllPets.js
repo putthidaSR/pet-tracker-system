@@ -1,26 +1,36 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, ActivityIndicator, Alert, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
+import { StyleSheet, ActivityIndicator, ScrollView, Alert, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
 import {REQUEST_URLS, USER_BADGE_NUMBER_STORAGE} from '../../Configuration';
-import { Button } from 'react-native-elements';
+import { Button, ButtonGroup } from 'react-native-elements';
 import axios from 'axios';
-import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
+import { Table, Row } from 'react-native-table-component';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default class ViewAllPets extends Component {
   
   constructor(props) {
     super(props);
-      
+    
     this.state = {
       username: '',
+      userId: 0,
       email: '',
       phoneNumber: '',
       address: '',
       badgeNumber: '',
-
-      tableHeader: ['Head', 'Head2', 'Head3', 'Head4'],
+      rfidNumber: '',
+      searchByOption: 0,
+      tableHeader: ['User', 'Pet Name', 'RFID #', 'Active', 'Contact'],
       tableData: [],
+
+      // For dropdown user list
+      allPetOwnersList: [],
+      items: [],
+      open: false,
+      value: null,
+
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
@@ -29,7 +39,38 @@ export default class ViewAllPets extends Component {
    * Get initial data
    */
   componentDidMount() {
-    this.getAllPetsWithDetails();
+    this.getAllPetOwner();
+  }
+
+  getAllPetOwner = async () => {
+
+    this.setState({isLoading: true});
+
+    await axios({
+      url: REQUEST_URLS.GET_ALL_PET_OWNERS,
+      method: 'GET'
+    })
+      .then((response) => {
+        this.setState({allPetOwnersList: response.data.result});
+
+        // Convert returned results into list of objects to be used in the dropdown
+        var userListDropdown = [];
+        for(var i = 0; i < this.state.allPetOwnersList.length; i++) {
+          const objectToAdd = {
+            label: this.state.allPetOwnersList[i].username,
+            value: this.state.allPetOwnersList[i].user_id
+          };
+          userListDropdown.push(objectToAdd);
+        }
+
+        this.setState({items: userListDropdown, isLoading: false});
+        console.log(this.state.items);
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
   }
 
   /**
@@ -49,7 +90,6 @@ export default class ViewAllPets extends Component {
       // ignore error here (won't have any effect)
     }
 
-    console.log(this.state.badgeNumber);
     await axios({
       url: REQUEST_URLS.VIEW_ALL_PETS_DETAILS,
       method: 'GET',
@@ -60,61 +100,207 @@ export default class ViewAllPets extends Component {
       .then((response) => {
         this.setState({isLoading: false});
         console.log(response.data);
+
+        let newTableData = [];
+        var serverData = response.data.results;
+        serverData.forEach((element, index) => {
+          console.log(index, element);
+          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.rfidStatus)];
+          newTableData.push(arrayElement);
+        });
+
+        this.setState({tableData: newTableData});
+
       })
       .catch((error) => {
         this.setState({isLoading: false});
-        Alert.alert('Error', error);
+        Alert.alert('Error', error.message);
         this.props.navigation.navigate('Homepage');
       });
   }
 
-  /*****************************************************
-   * Render the form to fill in
-  *****************************************************/
-  renderInputForm() {
-    return (
-      <View style={styles.formContainer}>
+  /**
+   * 
+   * @returns 
+   */
+  handleSearchPets = async () => {
 
-        <View style={{padding: 5}} />
-        <Text style={styles.fieldTitleText}>Address<Text style={{color: 'red'}}> *</Text></Text>
-        <TextInput
-          style = {styles.input}
-          onChangeText = {(address) => this.setState({address})}
-          placeholder = "Enter address"
-          placeholderTextColor = "gray"
-          autoCapitalize = "none"
-          autoCorrect = {false}
-          returnKeyType = "next"
-          onFocus = { () => this.setState({addres: ''})}
-          underlineColorAndroid = "#fff"
-        />
+    if (this.state.userId === 0 && this.state.rfidNumber === '') {
+      Alert.alert(
+        '',
+        '\nPlease enter RFID Tag Number or select a user.',
+        [{ text: 'OK' }],
+        { cancelable: false }
+      );
+      return;
+    }
 
-      </View>
-    );
+    this.setState({isLoading: true});
+
+    var url = this.state.rfidNumber !== '' ? REQUEST_URLS.VIEW_PET_BY_RFID + '/' + this.state.rfidNumber : REQUEST_URLS.VIEW_PETS_BY_USER + "/" + this.state.userId + '/pets';
+    console.log(url);
+
+    await axios.get(url)
+      .then((response) => {
+
+        let newTableData = [];
+        var serverData = response.data.results;
+        serverData.forEach((element, index) => {
+          console.log(index, element);
+          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.rfidStatus)];
+          newTableData.push(arrayElement);
+        });
+
+        this.setState({tableData: newTableData, isLoading: false, userId: 0});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        console.log(error.message);
+
+        if (error.response.status === 404) {
+          Alert.alert(
+            'No record found',
+            'Please check the RFID tag number again.',
+            [{ text: 'OK' }],
+            { cancelable: false }
+          );
+          return;
+        }
+
+        Alert.alert(
+          'Error',
+          error.message,
+          [{ text: 'OK' }],
+          { cancelable: false }
+        );
+        return;
+      });
+
   }
 
+  elementButton = (value) => (
+    <TouchableOpacity onPress={() => this._alertIndex(value)}>
+      <View style={styles.btn}>
+        <Text style={styles.btnText}>Active</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  _alertIndex(index) {
+    Alert.alert(`This is row ${index + 1}`);
+  }
+
+  setOpen = (open) => {
+    this.setState({
+      open
+    });
+  }
+
+  setValue = (callback) => {
+    this.setState(state => ({
+      value: callback(state.value)
+    }));
+  }
+
+  setItems = (callback) => {
+    this.setState(state => ({
+      items: callback(state.items)
+    }));
+  }
+
+
   /*****************************************************
-   * Render button that will add the pet to mobile phone
+   * Render search form with buttons
   *****************************************************/
-  renderRegisterButton() {
+  renderSearchForm = () => {
     return (
-      <View style={{}}>
-        <Button type="solid" title=" Register "
-          titleStyle={{fontSize: 15, fontWeight: 'bold'}}
-          containerStyle={{width: (Dimensions.get('window').width) - 50, alignSelf: 'center', marginTop: 20}}
-          buttonStyle={{
-            borderWidth: 5,
-            borderColor: '#F5C945',
-            borderRadius:20,
-            backgroundColor: '#0F2F44',
-            height: 50
+      <View style={{alignSelf: 'center', backgroundColor: '#F5C945', position: 'absolute', top: 0, left: 0, 
+        width: Dimensions.get('window').width, height: 200}}>
+
+
+        <Text style={styles.fieldTitleText}>Search By<Text style={{color: 'red'}}> *</Text></Text>
+        <ButtonGroup
+          textStyle={{fontSize: 12}}
+          onPress={(selectedIndex) => {
+            this.setState({searchByOption: selectedIndex});
           }}
-          onPress={this.handleUserRegistration} 
+          selectedIndex={this.state.searchByOption}
+          buttons={["RFID Tag Number", "Pet Owner's Name"]}
+          containerStyle={{height: 35, borderRadius: 10, borderWidth: 3, width: Dimensions.get('window').width - 80, alignSelf: 'center'}}
+          selectedButtonStyle={{backgroundColor:'#0F2F44'}}
         />
+
+        {
+          this.state.searchByOption === 0 &&
+          <TextInput
+            style = {styles.input}
+            onChangeText = {(rfidNumber) => this.setState({rfidNumber})}
+            placeholder = "Enter RFID Tag Number"
+            placeholderTextColor = "gray"
+            autoCapitalize = "none"
+            autoCorrect = {false}
+            returnKeyType = "next"
+            onFocus = { () => this.setState({rfidNumber: ''})}
+            underlineColorAndroid = "#fff"
+          />
+        }
+
+        {
+          this.state.searchByOption === 1 &&
+          <DropDownPicker
+            open={this.state.open}
+            value={this.state.value}
+            items={this.state.items}
+            setOpen={this.setOpen}
+            setValue={this.setValue}
+            setItems={this.setItems}
+            onChangeValue={(value) => {
+              this.setState({userId: value});
+            }}
+            placeholder="Select a user"
+            placeholderStyle={{color: "grey"}}
+            containerStyle={{
+              width: Dimensions.get('window').width - 80,
+              alignSelf: 'center',
+              paddingBottom: 15,
+              borderColor: '#EAF1FF'
+            }}
+            textStyle={{
+              fontSize: 13,
+              color: 'black'
+            }}
+            style={{
+              height: 35,
+              borderWidth: 3,
+              borderColor: '#EAF1FF'
+            }}
+          />
+        }
+
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+          <View style={{}}>
+            <Button type="solid" title=" Search "
+              titleStyle={{fontSize: 13, fontWeight: 'bold'}}
+              containerStyle={{width: (Dimensions.get('window').width - 80) / 2, alignSelf: 'center'}}
+              buttonStyle={{borderWidth: 2,borderColor: '#fff',borderRadius:10,backgroundColor: '#0F2F44',height: 40}}
+              onPress={this.handleSearchPets} 
+            />
+          </View>
+          <View style={{}}>
+            <Button type="solid" title=" View All Pets "
+              titleStyle={{fontSize: 13, fontWeight: 'bold'}}
+              containerStyle={{width: (Dimensions.get('window').width - 80) / 2, alignSelf: 'center'}}
+              buttonStyle={{borderWidth: 2,borderColor: '#fff',borderRadius:10,backgroundColor: '#0F2F44',height: 40}}
+              onPress={this.getAllPetsWithDetails} 
+            />
+          </View>
+        </View>
+
       </View>
+
+
     );
   }
-
 
   render() {
 
@@ -130,13 +316,58 @@ export default class ViewAllPets extends Component {
 
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{alignSelf: 'center', backgroundColor: '#F5C945', position: 'absolute', top: 0, left: 0, 
-          width: Dimensions.get('window').width, height: 50}} />
 
-        {this.renderInputForm()}
+        <View>
+          {this.renderSearchForm()}
+        </View>
 
-        {this.renderRegisterButton()}
+        {
+          this.state.tableData.length > 0 &&
 
+          <View style={styles.tableContainer}>
+            <ScrollView horizontal={true}>
+              <View>
+                <Table borderStyle={{borderWidth: 1, borderColor: '#C1C0B9'}}>
+                  <Row data={this.state.tableHeader} widthArr={[80, 80, 80, 80, 80]} style={styles.head} textStyle={styles.text}/>
+                </Table>
+
+                <ScrollView style={styles.dataWrapper}>
+                  <Table borderStyle={{borderWidth: 1}}>
+                    {/* {
+                      state.tableData.map((rowData, index) => (
+                        <TableWrapper key={index} style={styles.row}>
+                          {
+                            rowData.map((cellData, cellIndex) => (
+
+                              <Cell key={cellIndex} 
+                                data={cellIndex === 3 ? element(cellData, index) : cellData} 
+                                textStyle={{...styles.text, fontSize: 12, color: 'black'}} />
+                            ))
+                          }
+                        </TableWrapper>
+                      ))
+                    } */}
+
+                    {
+                      this.state.tableData.map((rowData, index) => (
+                        <Row
+                          key={index}
+                          data={rowData}
+                          widthArr={[80, 80, 80, 80, 80]}
+                          style={[styles.row, index%2 && {backgroundColor: '#fff'}]}
+                          textStyle={{...styles.text, fontSize: 12, color: 'black'}}
+                        />
+                      ))
+                    }
+                  </Table>
+                </ScrollView>
+              </View>
+            </ScrollView>
+          
+            
+          </View>
+        
+        }
       </SafeAreaView>
     );
   }
@@ -146,36 +377,39 @@ export default class ViewAllPets extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center"
+    backgroundColor: "#fff"
   },
-  formContainer: {
-    //backgroundColor: '#EAF1FF',
-    alignSelf: 'center',
-    width: Dimensions.get('window').width - 40,
-    borderRadius: 30,
-    borderColor: '#EAF1FF', 
-    borderWidth: 5
-  },
+  tableContainer: {
+    marginTop: 200
+  }, 
   fieldTitleText: {
     color: '#0F2F44', 
     fontWeight: 'bold', 
-    paddingLeft: 20,
+    paddingLeft: 50,
     paddingBottom: 5,
-    textAlign: 'left'
+    textAlign: 'left',
+    fontSize: 15
   },
   input: {
     alignSelf: 'center',
     width: Dimensions.get('window').width - 80,
-    height: 40,
+    height: 35,
     backgroundColor: '#fff',
     marginBottom: 20,
-    color: '#0F2F44',
-    borderWidth: 2,
-    borderColor: 'gray',
+    color: 'black',
+    borderWidth: 3,
+    borderColor: '#EAF1FF',
     paddingHorizontal: 20,
-    borderRadius: 10
-  }
+    borderRadius: 10,
+    fontSize: 13
+  },
+
+  head: { height: 40, backgroundColor: '#0F2F44' },
+  text: { margin: 6, color: 'white', fontWeight: 'bold' },
+  row: { flexDirection: 'row', backgroundColor: '#FFF1C1' },
+  btn: { width: 58, height: 18, backgroundColor: '#78B7BB',  borderRadius: 2 },
+  btnText: { textAlign: 'center', color: '#fff' },
+  dataWrapper: { marginTop: -1 }
+
 });
 

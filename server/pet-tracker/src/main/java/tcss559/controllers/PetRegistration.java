@@ -111,13 +111,47 @@ public class PetRegistration {
 						
 		} catch (Exception e) {
 			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+			return Response.status(Response.Status.BAD_REQUEST)
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
 	
 	/**
-	 * Only active vet can view all pets.
+	 * {
+    "results": [
+        {
+            "userId": 6,
+            "username": "thida",
+            "email": "test111@uw.edu",
+            "userActive": false,
+            "petId": 3,
+            "petName": "test2",
+            "rfidNumber": "2234455555",
+            "rfidStatus": true
+        },
+        {
+            "userId": 6,
+            "username": "thida",
+            "email": "test111@uw.edu",
+            "userActive": false,
+            "petId": 2,
+            "petName": "test",
+            "rfidNumber": "dsfdsf3333",
+            "rfidStatus": true
+        },
+        {
+            "userId": 7,
+            "username": "newtest",
+            "phoneNumber": "2065966256",
+            "email": "test111@uw.edu",
+            "userActive": true,
+            "petId": 1,
+            "petName": "bella",
+            "rfidNumber": "123456778DB",
+            "rfidStatus": false
+        }
+    ]
+}
 	 * @param badgeNumber
 	 * @return
 	 */
@@ -125,94 +159,7 @@ public class PetRegistration {
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response GetAllPets(@HeaderParam("badge_number") String badgeNumber) {
-				
-		if (badgeNumber == null) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity("Please provide badge number as the header.")
-					.build();
-		}
-		
-		/*
-		 * Check if the provided badge number exists in the system by invoking the
-		 * provided service URL to get resource
-		 */
-		String response;
-		try {
-			
-			String serviceURL = "http://localhost:8080/PawTracker/users/vet/" + badgeNumber;
-			response = HandleConnection.getResourceFromURL(serviceURL);
-
-		} catch (Exception error) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity("Fail to view pet details as the provided badge number is not found in our system.")
-					.build();
-		}
-				
-		try {
-			
-			// select * from pet, pet_detail where pet.id = pet_detail.pet_detail_id;
-			
-			// Establish connection to MySQL server
-        	Connection connection = HandleConnection.getConnection();
-        	
-        	// Construct the query to return matching record
-    		PreparedStatement stmt = connection.prepareStatement("SELECT u.id AS user_id, role, login_name FROM user u, account_detail ad WHERE u.id = ad.id AND ad.role = ? ");
-    		stmt.setString(1, User.ROLE_PET_OWNER);
-
-    		// Execute SQL query
-    		ResultSet rs = stmt.executeQuery();  
-    		
-						
-			// Return successful response if no error
-			return Response.status(Response.Status.OK)
-					.entity(response)
-					.build();
-			
-		} catch (Exception e) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
-					.entity("Error Message: " + e.getLocalizedMessage()).build();
-		}
-	}
-	
-	@Path("/{id}")
-	@GET
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getOnePet(@PathParam("id") int petId) {
-		
-		try {
-			
-			Session session = HibernateUtils.getSession();
-			Query query = session.createQuery("from Pet where id= :id");
-			List<Pet> petList = query.setParameter("id", petId).list();
-	        session.close();
-	        if (petList.isEmpty()) {
-	        	return Response.status(Response.Status.NOT_FOUND).entity("").build();	
-	        }
-	        Gson g = new Gson();
-	        String responseData = g.toJson(petList.get(0));
-			
-			// Return successful response if no error
-			return Response.status(Response.Status.OK)
-					.entity(responseData)
-					.build();
-			
-		} catch (Exception e) {
-			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
-					.entity("Error Message: " + e.getLocalizedMessage()).build();
-		}
-	}
-	
-	@Path("/details")
-	@GET
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response ViewAllPetsWithDetails(@HeaderParam("badge_number") String badgeNumber) {
+	public Response ViewAllPets(@HeaderParam("badge_number") String badgeNumber) {
 		
 		if (badgeNumber == null) {
 			// Return expected error response
@@ -239,8 +186,6 @@ public class PetRegistration {
 		
 		
 		try {
-			
-			// select * from pet, pet_detail where pet.id = pet_detail.pet_detail_id;
 			
 			// Establish connection to MySQL server
         	Connection connection = HandleConnection.getConnection();
@@ -305,10 +250,121 @@ public class PetRegistration {
 			
 		} catch (Exception e) {
 			// Return expected error response
-			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+			return Response.status(Response.Status.BAD_REQUEST)
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
+	
+
+	@Path("/{rfid_number}")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response GetPetByRfidNumber(@PathParam("rfid_number") String rfidNumber) {
+				
+		
+		try {
+			
+			// Establish connection to MySQL server
+			Connection connection = HandleConnection.getConnection();
+			
+			// Construct the query to return matching record
+			String sql = "SELECT u.id AS user_id, u.login_name AS user_name, "
+					+ "ad.phone_number, ad.email, ad.address, ad.active AS user_active, "
+					+ "p.id AS pet_id, pd.name AS pet_name, p.rfid_number, pd.active AS rfid_status "
+					+ "FROM user u "
+					+ "JOIN pet p ON u.id = p.user_id "
+					+ "JOIN pet_detail pd ON p.id = pd.pet_detail_id "
+					+ "JOIN account_detail ad ON u.id = ad.id "
+					+ "WHERE p.rfid_number = ? "
+					+ "ORDER BY p.id DESC";
+			
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			stmt.setString(1, rfidNumber);
+		
+			// Execute SQL query
+			ResultSet rs = stmt.executeQuery();
+		
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+		
+			JsonArray arr = new JsonArray();
+						
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+				
+				// Each element in the array (pet with details)
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("userId", rs.getInt("user_id"));
+				eachElement.addProperty("username", rs.getString("user_name"));
+				eachElement.addProperty("phoneNumber", rs.getString("phone_number"));
+				eachElement.addProperty("email", rs.getString("email"));
+				eachElement.addProperty("address", rs.getString("address"));
+				eachElement.addProperty("userActive", rs.getBoolean("user_active"));
+				eachElement.addProperty("petId", rs.getInt("pet_id"));
+				eachElement.addProperty("petName", rs.getString("pet_name"));
+				eachElement.addProperty("rfidNumber", rs.getString("rfid_number"));
+				eachElement.addProperty("rfidStatus", rs.getBoolean("rfid_status"));
+		
+				arr.add(eachElement);
+			}
+		
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+			
+			JsonObject obj = new JsonObject();
+			obj.add("results", arr);
+			
+			jsonResponse = gson.toJson(obj);
+		
+			connection.close();
+		
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	
+//	@Path("/{id}")
+//	@GET
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response getOnePet(@PathParam("id") int petId) {
+//		
+//		try {
+//			
+//			Session session = HibernateUtils.getSession();
+//			Query query = session.createQuery("from Pet where id= :id");
+//			List<Pet> petList = query.setParameter("id", petId).list();
+//	        session.close();
+//	        if (petList.isEmpty()) {
+//	        	return Response.status(Response.Status.NOT_FOUND).entity("").build();	
+//	        }
+//	        Gson g = new Gson();
+//	        String responseData = g.toJson(petList.get(0));
+//			
+//			// Return successful response if no error
+//			return Response.status(Response.Status.OK)
+//					.entity(responseData)
+//					.build();
+//			
+//		} catch (Exception e) {
+//			// Return expected error response
+//			return Response.status(Response.Status.BAD_REQUEST)
+//					.entity("Error Message: " + e.getLocalizedMessage()).build();
+//		}
+//	}
+	
 	
 //	
 //	/**

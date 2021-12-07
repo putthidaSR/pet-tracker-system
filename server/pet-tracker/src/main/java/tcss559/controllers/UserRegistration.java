@@ -465,6 +465,83 @@ public class UserRegistration {
 		}
 	}
 	
+	@Path("/{user_id}/pets")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response GetPetsByUser(@PathParam("user_id") int userId) {
+				
+		try {
+			
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+        	// Construct the query to return matching record
+        	String sql = "SELECT u.id AS user_id, u.login_name AS user_name, "
+        			+ "ad.phone_number, ad.email, ad.address, ad.active AS user_active, "
+        			+ "p.id AS pet_id, pd.name AS pet_name, p.rfid_number, pd.active AS rfid_status "
+        			+ "FROM user u "
+        			+ "JOIN pet p ON u.id = p.user_id "
+        			+ "JOIN pet_detail pd ON p.id = pd.pet_detail_id "
+        			+ "JOIN account_detail ad ON u.id = ad.id "
+        			+ "WHERE u.id = ? "
+        			+ "ORDER BY p.id DESC";
+        	
+    		PreparedStatement stmt = connection.prepareStatement(sql);
+    		stmt.setInt(1, userId);
+
+			// Execute SQL query
+			ResultSet rs = stmt.executeQuery();
+
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+
+			JsonArray arr = new JsonArray();
+						
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+				
+				// Each element in the array (pet with details)
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("userId", rs.getInt("user_id"));
+				eachElement.addProperty("username", rs.getString("user_name"));
+				eachElement.addProperty("phoneNumber", rs.getString("phone_number"));
+				eachElement.addProperty("email", rs.getString("email"));
+				eachElement.addProperty("address", rs.getString("address"));
+				eachElement.addProperty("userActive", rs.getBoolean("user_active"));
+				eachElement.addProperty("petId", rs.getInt("pet_id"));
+				eachElement.addProperty("petName", rs.getString("pet_name"));
+				eachElement.addProperty("rfidNumber", rs.getString("rfid_number"));
+				eachElement.addProperty("rfidStatus", rs.getBoolean("rfid_status"));
+
+				arr.add(eachElement);
+			}
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+			
+			JsonObject obj = new JsonObject();
+			obj.add("results", arr);
+			
+			jsonResponse = gson.toJson(obj);
+
+			connection.close();
+
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
 	/**
 	 * @api {DELETE} /users Delete Users information
 	 * @apiName deleteAllUser

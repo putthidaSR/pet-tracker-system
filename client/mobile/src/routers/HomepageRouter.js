@@ -190,8 +190,8 @@ function HomepageStack() {
       })} />
 
       <Stack.Screen name="ViewAllPets" component={ViewAllPets} options={({ navigation }) => ({
-        headerShown: false,
-        headerTitle: 'View All Pets',
+        headerShown: true,
+        headerTitle: '',
         headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
         headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (
