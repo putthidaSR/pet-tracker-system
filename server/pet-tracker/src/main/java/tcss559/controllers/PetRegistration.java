@@ -109,6 +109,54 @@ public class PetRegistration {
 		}
 	}
 	
+	@Path("/")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllPets(@HeaderParam("badge_number") String badgeNumber) {
+		try {
+			
+			// Return successful response if no error
+			return Response.status(Response.Status.OK)
+					.entity("OK")
+					.build();
+			
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	@Path("/{id}")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getOnePet(@PathParam("id") int petId) {
+		
+		try {
+			
+			Session session = HibernateUtils.getSession();
+			Query query = session.createQuery("from Pet where id= :id and active = 'Y'");
+			List<Pet> petList = query.setParameter("id", petId).list();
+	        session.close();
+	        if (petList.isEmpty()) {
+	        	return Response.status(Response.Status.NOT_FOUND).entity("").build();	
+	        }
+	        Gson g = new Gson();
+	        String responseData = g.toJson(petList.get(0));
+			
+			// Return successful response if no error
+			return Response.status(Response.Status.OK)
+					.entity(responseData)
+					.build();
+			
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
 	
 //	
 //	/**
