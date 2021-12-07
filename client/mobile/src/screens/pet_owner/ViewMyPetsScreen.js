@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { StyleSheet, SafeAreaView, Text, ScrollView, Image, View, Alert, Dimensions, ActivityIndicator } from "react-native";
 import axios from 'axios';
-import {USER_KEY_STORAGE} from '../Configuration';
+import {USER_KEY_STORAGE} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Button } from 'react-native-elements';
 import moment from 'moment';

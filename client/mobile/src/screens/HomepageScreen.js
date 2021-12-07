@@ -140,7 +140,7 @@ export default class HomepageScreen extends Component {
             <View style={styles.buttonContainer}>
               {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/pet-registration.png'))}
               {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
-              {this.renderMenuOption("View All Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
+              {this.renderMenuOption("View All Pets", 'ViewAllPets', require('./../assets/images/view-pets.png'))}
             </View>
         }
 

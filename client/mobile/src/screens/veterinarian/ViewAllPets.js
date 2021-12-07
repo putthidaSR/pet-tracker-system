@@ -1,11 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
 import { StyleSheet, ActivityIndicator, Alert, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
-import {REQUEST_URLS} from '../Configuration';
+import {REQUEST_URLS} from '../../Configuration';
 import { Button } from 'react-native-elements';
 import axios from 'axios';
 
-export default class UserRegistration extends Component {
+export default class ViewAllPets extends Component {
   
   constructor(props) {
     super(props);
@@ -56,48 +56,6 @@ export default class UserRegistration extends Component {
   renderInputForm() {
     return (
       <View style={styles.formContainer}>
-        
-        <View style={{padding: 20}} />
-        <Text style={styles.fieldTitleText}>Name<Text style={{color: 'red'}}> *</Text></Text>
-        <TextInput
-          style = {styles.input}
-          onChangeText = {(username) => this.setState({username})}
-          placeholder = "Enter username"
-          placeholderTextColor = "gray"
-          autoCapitalize = "none"
-          autoCorrect = {false}
-          returnKeyType = "next"
-          onFocus = { () => this.setState({username: ''})}
-          underlineColorAndroid = "#fff"
-        />
-
-        <View style={{padding: 5}} />
-        <Text style={styles.fieldTitleText}>Email<Text style={{color: 'red'}}> *</Text></Text>
-        <TextInput
-          style = {styles.input}
-          onChangeText = {(email) => this.setState({email})}
-          placeholder = "Enter email"
-          placeholderTextColor = "gray"
-          autoCapitalize = "none"
-          autoCorrect = {false}
-          returnKeyType = "next"
-          onFocus = { () => this.setState({email: ''})}
-          underlineColorAndroid = "#fff"
-        />
-
-        <View style={{padding: 5}} />
-        <Text style={styles.fieldTitleText}>Phone Number<Text style={{color: 'red'}}> *</Text></Text>
-        <TextInput
-          style = {styles.input}
-          onChangeText = {(phoneNumber) => this.setState({phoneNumber})}
-          placeholder = "Enter phone number"
-          placeholderTextColor = "gray"
-          autoCapitalize = "none"
-          autoCorrect = {false}
-          returnKeyType = "next"
-          onFocus = { () => this.setState({phoneNumber: ''})}
-          underlineColorAndroid = "#fff"
-        />
 
         <View style={{padding: 5}} />
         <Text style={styles.fieldTitleText}>Address<Text style={{color: 'red'}}> *</Text></Text>

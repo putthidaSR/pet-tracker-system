@@ -10,13 +10,15 @@ import HomepageScreen from '../screens/HomepageScreen';
 import AccountScreen from '../screens/AccountScreen';
 
 // For homepage stack
-import PetRegistrationScreen from '../screens/PetRegistrationScreen';
-import WeatherInfoScreen from '../screens/WeatherInfoScreen';
-import PetLocationScreen from '../screens/AllPetsLocationScreen';
-import ViewMyPetsScreen from '../screens/ViewMyPetsScreen';
-import EachPetLocationScreen from '../screens/EachPetLocationScreen';
+import WeatherInfoScreen from '../screens/pet_owner/WeatherInfoScreen';
+import PetLocationScreen from '../screens/pet_owner/AllPetsLocationScreen';
+import ViewMyPetsScreen from '../screens/pet_owner/ViewMyPetsScreen';
+import EachPetLocationScreen from '../screens/pet_owner/EachPetLocationScreen';
 
-import UserRegistration from '../screens/UserRegistration';
+// Features for veterinarians
+import UserRegistration from '../screens/veterinarian/UserRegistration';
+import PetRegistrationScreen from '../screens/veterinarian/PetRegistrationScreen';
+import ViewAllPets from '../screens/veterinarian/ViewAllPets';
 
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
@@ -175,6 +177,19 @@ function HomepageStack() {
       <Stack.Screen name="UserRegistration" component={UserRegistration} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Register New User',
+        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
+        headerStyle: {backgroundColor: '#F5C945'},
+        headerLeft: () => (
+          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
+        )
+      })} />
+
+      <Stack.Screen name="ViewAllPets" component={ViewAllPets} options={({ navigation }) => ({
+        headerShown: false,
+        headerTitle: 'View All Pets',
         headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
         headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (

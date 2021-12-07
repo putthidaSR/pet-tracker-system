@@ -19,7 +19,7 @@ public class PetDetail {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "pet_detail_id")
     private int id;
 	
 	@Column(name = "name")

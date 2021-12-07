@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { SafeAreaView, Dimensions, StyleSheet, Text, TextInput, View, ActivityIndicator, Alert } from "react-native";
 import { Button, ButtonGroup } from 'react-native-elements';
 import axios from 'axios';
-import {REQUEST_URLS} from '../Configuration';
+import {REQUEST_URLS} from '../../Configuration';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 /**

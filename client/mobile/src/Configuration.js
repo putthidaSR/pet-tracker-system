@@ -24,5 +24,8 @@ export const REQUEST_URLS = {
   GET_ALL_PET_OWNERS: REQUEST_URL_PREFIX + '/users/pet_owner', // GET
 
   // Pet registration
-  REGISTER_PET: REQUEST_URL_PREFIX + '/pets'  // POST
+  REGISTER_PET: REQUEST_URL_PREFIX + '/pets',  // POST
+
+  // Pet-related
+  VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets/details' // GET
 };

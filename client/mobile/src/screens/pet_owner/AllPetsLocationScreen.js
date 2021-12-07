@@ -4,7 +4,7 @@ import React, { Component } from "react";
 import { StyleSheet, Alert, Text, View, ActivityIndicator, Image, TouchableHighlight, Dimensions } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
-import NavigateBetweenTwoRoutes from '../components/NavigateBetweenTwoRoutes';
+import NavigateBetweenTwoRoutes from '../../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
