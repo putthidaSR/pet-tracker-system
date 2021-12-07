@@ -5,8 +5,13 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+/**
+ * Model class represents the structure in pet_location table in the paw_tracker database.
+ */
 @Entity
 @Table(name = "pet_location")
 public class PetLocation {
@@ -14,8 +19,9 @@ public class PetLocation {
 	@Id
     private int id;
 	
-	@Column(name = "rfid_number")
-    private String rfidNumber;
+	@ManyToOne
+    @JoinColumn(name = "pet_id")
+	private Pet pet;
 	
 	@Column(name = "longitude")
     private double longitude;
@@ -23,11 +29,8 @@ public class PetLocation {
 	@Column(name = "latitude")
     private double latitude;
 	
-	@Column(name = "create_time")
-	private Date createTime;
-	
-	@Column(name = "active")
-	private String active;
+	@Column(name = "last_seen")
+	private Date lastSeenDate;
 
 	public int getId() {
 		return id;
@@ -35,15 +38,6 @@ public class PetLocation {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	
-	public String getRfidNumber() {
-		return rfidNumber;
-	}
-
-	public void setRfidNumber(String rfidNumber) {
-		this.rfidNumber = rfidNumber;
 	}
 
 	public double getLongitude() {
@@ -62,22 +56,20 @@ public class PetLocation {
 		this.latitude = latitude;
 	}
 
-	public Date getCreateTime() {
-		return createTime;
+	public Pet getPet() {
+		return pet;
 	}
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
+	public void setPet(Pet pet) {
+		this.pet = pet;
 	}
 
-	public String getActive() {
-		return active;
+	public Date getLastSeenDate() {
+		return lastSeenDate;
 	}
 
-	public void setActive(String active) {
-		this.active = active;
+	public void setLastSeenDate(Date lastSeenDate) {
+		this.lastSeenDate = lastSeenDate;
 	}
 	
-	
-
 }

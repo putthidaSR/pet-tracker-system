@@ -108,6 +108,8 @@ public class PetRegistration {
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
+	
+	
 //	
 //	/**
 //	 * @api {PUT} /pets/:id Update Pet information
