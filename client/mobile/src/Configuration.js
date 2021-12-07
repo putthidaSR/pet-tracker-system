@@ -20,5 +20,9 @@ export const REQUEST_URLS = {
   REGISTER: REQUEST_URL_PREFIX + '/users', // PUT
   LOGIN: REQUEST_URL_PREFIX + '/users/login', // POST
 
-  ADD_PET_OWNER: REQUEST_URL_PREFIX + '/users/pet_owner' // POST
+  ADD_PET_OWNER: REQUEST_URL_PREFIX + '/users/pet_owner', // POST
+  GET_ALL_PET_OWNERS: REQUEST_URL_PREFIX + '/users/pet_owner', // GET
+
+  // Pet registration
+  REGISTER_PET: REQUEST_URL_PREFIX + '/pets'  // POST
 };

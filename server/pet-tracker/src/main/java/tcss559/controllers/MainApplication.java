@@ -16,10 +16,10 @@ public class MainApplication extends Application {
 	public Set<Class<?>> getClasses() {
 
 		HashSet<Class<?>> resources = new HashSet<>();
-		
-		// Add classes that to be supported by application
+
+		// Add classes that to be supported by application		
+		resources.add(PetRegistration.class);
 		resources.add(UserRegistration.class);
-		//resources.add(PetRegistration.class);
 		//resources.add(LocationProvider.class);
 		
 		return resources;

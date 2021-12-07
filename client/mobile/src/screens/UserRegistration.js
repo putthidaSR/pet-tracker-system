@@ -41,7 +41,7 @@ export default class UserRegistration extends Component {
         this.setState({isLoading: false});
 
         Alert.alert('Success', this.state.username + ' has been registered with the Paw Tracker system. User will receive a text message with instructions to setup an account.');
-        this.props.navigation.navigate('Homepage');
+        this.props.navigation.goBack();
       })
       .catch((error) => {
         this.setState({isLoading: false});

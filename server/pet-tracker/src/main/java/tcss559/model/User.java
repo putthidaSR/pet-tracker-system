@@ -1,6 +1,7 @@
 package tcss559.model;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +14,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
- * Dto represents "user" and "account_detail" tables in PawTracker database.
+ * Model class represents the structure of "user" and "account_detail" tables in PawTracker database.
+ * Note that user table has a one-to-one relationship with account_detail table.
  */
 @Entity
 @Table(name = "user")
@@ -41,7 +43,6 @@ public class User {
 	@Column(name = "login_password")
 	private String loginPassword;
 	
-	
 	@Column(name = "role", table = "account_detail")
 	private String role;
 	
@@ -63,11 +64,18 @@ public class User {
 	@Column(name = "confirmation_code", table = "account_detail")
 	private int confirmationCode;
 	
-   // Default constructor
-   public User() {
-	   super();
-   }
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<Pet> pets;
 	
+    // Default constructor
+	public User() {
+		super();
+	}
+	
+	public User(int id) {
+		this.id = id;
+	}
+
 	public User(int id, Date modificationTime, String role, String loginName, String badgeNumber, String email,
 			String phoneNumber, String address, boolean active) {
 		this.id = id;
@@ -180,5 +188,14 @@ public class User {
 	public void setLoginPassword(String loginPassword) {
 		this.loginPassword = loginPassword;
 	}
+
+	public Set<Pet> getPets() {
+		return pets;
+	}
+
+	public void setPets(Set<Pet> pets) {
+		this.pets = pets;
+	}
+	
 
 }
