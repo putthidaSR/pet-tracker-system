@@ -3,6 +3,7 @@ package tcss559.controllers;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -30,6 +32,7 @@ import tcss559.hibernate.HibernateUtils;
 import tcss559.model.Pet;
 import tcss559.model.PetDetail;
 import tcss559.model.User;
+import tcss559.request.UpdatePet;
 import tcss559.utilities.*;
 
 
@@ -256,12 +259,30 @@ public class PetRegistration {
 	}
 	
 
+	/**
+	 * 
+	 * {
+    "results": [
+        {
+            "userId": 6,
+            "username": "thida",
+            "email": "test111@uw.edu",
+            "userActive": false,
+            "petId": 2,
+            "petName": "test",
+            "rfidNumber": "dsfdsf3333",
+            "rfidStatus": true
+        }
+    ]
+}
+	 * @param rfidNumber
+	 * @return
+	 */
 	@Path("/{rfid_number}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response GetPetByRfidNumber(@PathParam("rfid_number") String rfidNumber) {
-				
 		
 		try {
 			
@@ -334,37 +355,81 @@ public class PetRegistration {
 		}
 	}
 	
-	
-//	@Path("/{id}")
-//	@GET
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response getOnePet(@PathParam("id") int petId) {
-//		
-//		try {
-//			
-//			Session session = HibernateUtils.getSession();
-//			Query query = session.createQuery("from Pet where id= :id");
-//			List<Pet> petList = query.setParameter("id", petId).list();
-//	        session.close();
-//	        if (petList.isEmpty()) {
-//	        	return Response.status(Response.Status.NOT_FOUND).entity("").build();	
-//	        }
-//	        Gson g = new Gson();
-//	        String responseData = g.toJson(petList.get(0));
-//			
-//			// Return successful response if no error
-//			return Response.status(Response.Status.OK)
-//					.entity(responseData)
-//					.build();
-//			
-//		} catch (Exception e) {
-//			// Return expected error response
-//			return Response.status(Response.Status.BAD_REQUEST)
-//					.entity("Error Message: " + e.getLocalizedMessage()).build();
-//		}
-//	}
-	
+//	/**
+//	 * @api {PUT} /pets/:id Update Pet information
+//	 * @apiName upatePet
+//	 * @apiGroup PetRegistration
+//	 *
+//	 * @apiParam {Number} userId Related user unique ID.
+//	 * @apiParam {String} rfidNumber  Pet rfid number.
+//	 * @apiParam {String} name Pet name.
+//	 * @apiParam {String} category  Pet category.
+//	 * @apiParamExample {json} Request-Example:
+//	 *     {
+//	 *         "rfidNumber": "0000000",
+//	 *         "name": "john",
+//	 *         "age": "2 months",
+//	 *         "active": true
+//	 *     }
+//	 * @apiSuccessExample {json} Success-Response:
+//	 *     HTTP/1.1 200 OK
+//	 */
+	@Path("/{id}")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updatePet(UpdatePet updatePet, @PathParam("id") int id) {
+		try {
+			
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+			// Update RFID
+			String rfidNumber = updatePet.getRfidNumber();
+			if (rfidNumber != null && rfidNumber.length() != 0) {
+				PreparedStatement stmt = connection.prepareStatement("update pet set rfid_number = ? where id = ?");
+	    		stmt.setString(1, rfidNumber);
+	    		stmt.setInt(2, id);
+	    		stmt.executeUpdate();
+			}
+			
+			// Update pet name
+			String name = updatePet.getName();
+			if (name != null && name.length() != 0) {
+				PreparedStatement stmt = connection.prepareStatement("update pet_detail set name = ? where pet_detail_id = ?");
+	    		stmt.setString(1, name);
+	    		stmt.setInt(2, id);
+	    		stmt.executeUpdate();
+			}
+
+			// Update pet age
+			String age = updatePet.getAge();
+			if (age != null && age.length() != 0) {
+				PreparedStatement stmt = connection.prepareStatement("update pet_detail set age = ? where pet_detail_id = ?");
+				stmt.setString(1, age);
+				stmt.setInt(2, id);
+				stmt.executeUpdate();
+			}
+
+			// Update pet active status
+			boolean status = updatePet.isActive();
+			System.out.println(status);
+			PreparedStatement stmt = connection.prepareStatement("update pet_detail set active = ? where pet_detail_id = ?");
+			stmt.setBoolean(1, status);
+			stmt.setInt(2, id);
+			stmt.executeUpdate();
+			
+			connection.close();
+			
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity("").build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Error Message: " + e.getLocalizedMessage())
+					.build();
+		}
+	}
 	
 //	
 //	/**
@@ -386,37 +451,37 @@ public class PetRegistration {
 //	 * @apiSuccessExample {json} Success-Response:
 //	 *     HTTP/1.1 200 OK
 //	 */
-////	@Path("/{id}")
-////	@PUT
-////	@Consumes(MediaType.APPLICATION_JSON)
-////	@Produces(MediaType.TEXT_PLAIN)
-////	public Response upatePet(UpdatePet updatePet, @PathParam("id") int id) {
-////		Session session = HibernateUtils.getSession();
-////		Query query = session.createQuery("from Pet where id= :id and active = 'Y'");
-////		List<Pet> petList = query.setParameter("id", id).list();
-////		if (petList.isEmpty()) {
-////			return Response.status(Response.Status.NOT_FOUND).entity("").build();	
-////		}
-////		Pet pet = petList.get(0);
-////		pet.setModifyTime(new Date());
-////		String rfidNumber = updatePet.getRfidNumber();
-////		if (rfidNumber != null & rfidNumber.length() != 0) {
-////			pet.setRfidNumber(rfidNumber);
-////		}
-////		String name = updatePet.getName();
-////		if (name != null & name.length() != 0) {
-////			pet.setName(name);
-////		}
-////		String category = updatePet.getCategory();
-////		if (category != null & category.length() != 0) {
-////			pet.setCategory(category);
-////		}
-////		session.update(pet);
-////		Transaction t = session.beginTransaction();
-////		t.commit();
-////        session.close();
-////        return Response.status(Response.Status.OK).entity("").build();
-////	}
+//	@Path("/{id}")
+//	@PUT
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	@Produces(MediaType.TEXT_PLAIN)
+//	public Response upatePet(UpdatePet updatePet, @PathParam("id") int id) {
+//		Session session = HibernateUtils.getSession();
+//		Query query = session.createQuery("from Pet where id= :id and active = 'Y'");
+//		List<Pet> petList = query.setParameter("id", id).list();
+//		if (petList.isEmpty()) {
+//			return Response.status(Response.Status.NOT_FOUND).entity("").build();	
+//		}
+//		Pet pet = petList.get(0);
+//		pet.setModifyTime(new Date());
+//		String rfidNumber = updatePet.getRfidNumber();
+//		if (rfidNumber != null & rfidNumber.length() != 0) {
+//			pet.setRfidNumber(rfidNumber);
+//		}
+//		String name = updatePet.getName();
+//		if (name != null & name.length() != 0) {
+//			pet.setName(name);
+//		}
+//		String category = updatePet.getCategory();
+//		if (category != null & category.length() != 0) {
+//			pet.setCategory(category);
+//		}
+//		session.update(pet);
+//		Transaction t = session.beginTransaction();
+//		t.commit();
+//        session.close();
+//        return Response.status(Response.Status.OK).entity("").build();
+//	}
 //	
 //	/**
 //	 * @api {DELETE} /pets Delete Pets information

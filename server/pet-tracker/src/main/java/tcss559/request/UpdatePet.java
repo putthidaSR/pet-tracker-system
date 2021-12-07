@@ -6,10 +6,9 @@ public class UpdatePet {
 
 	private String name;
 	
-	private String category;
+	private String age;
 	
-	private int year;
-
+	private boolean active;
 
 	public String getRfidNumber() {
 		return rfidNumber;
@@ -27,22 +26,20 @@ public class UpdatePet {
 		this.name = name;
 	}
 
-	public String getCategory() {
-		return category;
+	public String getAge() {
+		return age;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setAge(String age) {
+		this.age = age;
 	}
 
-	public int getYear() {
-		return year;
+	public boolean isActive() {
+		return active;
 	}
 
-	public void setYear(int year) {
-		this.year = year;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
-	
-	
 	
 }
