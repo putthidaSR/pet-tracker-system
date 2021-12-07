@@ -7,6 +7,9 @@ import Geolocation from 'react-native-geolocation-service';
 import NavigateBetweenTwoRoutes from '../../components/NavigateBetweenTwoRoutes';
 import moment from 'moment';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import {REQUEST_URLS, USER_ID_KEY_STORAGE} from '../../Configuration';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
@@ -19,6 +22,7 @@ export default class PetLocationScreen extends Component {
     super(props);
       
     this.state = {
+      userId: 0,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -44,12 +48,41 @@ export default class PetLocationScreen extends Component {
 
   }
     
-  componentDidMount() {
-    //this.getCurrentDeviceLocation();
+  async componentDidMount() {
+    await this.getCurrentDeviceLocation();
   }
 
   componentWillUnmount() {
     this.watchID != null && Geolocation.clearWatch(this.watchID);
+  }
+
+  /***************************************************************
+   * Get the info of the current logged-in user from app cache
+   ****************************************************************/
+  getCurrentUser = async () => {
+    try {
+  
+      this.setState({isLoading: true});
+  
+      // Retrieve user ID from app cache if exists
+      const userIdFromCache = await AsyncStorage.getItem(USER_ID_KEY_STORAGE);
+      if (userIdFromCache !== null) {
+        this.setState({userId: userIdFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.id !== null) {
+          this.setState({userId: this.props.route.params.id});
+        }
+      } else {
+        // Prompt user to login again
+        this.props.navigation.navigate('SignInScreen');
+        return;
+      }
+  
+      this.setState({isLoading: false});
+  
+    } catch (error) {
+      this.setState({isLoading: false});
+    }
   }
 
   async getCurrentDeviceLocation() {
@@ -57,20 +90,17 @@ export default class PetLocationScreen extends Component {
     this.setState({isLoading: true});
 
     Geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         console.log('Current position: ' + JSON.stringify(position.coords));
 
         this.setState({ 
           currentLatitude: parseFloat(position.coords.latitude),
           currentLongitude: parseFloat(position.coords.longitude)});
 
-        let region = {
-          latitude: parseFloat(position.coords.latitude),
-          longitude: parseFloat(position.coords.longitude),
-          latitudeDelta: 5,
-          longitudeDelta: 5
-        };
-        this.setState({initialRegion: region});
+        this.setState({isLoading: false});
+
+        // After getting current geolocation, attempt to call server to get locations data
+        await this.getPetLocationData();
       },
       error => {
         // eslint-disable-next-line no-console
@@ -88,6 +118,41 @@ export default class PetLocationScreen extends Component {
       const lastPosition = JSON.stringify(position);
       this.setState({lastPosition});
     });
+  }
+
+  getPetLocationData = async() => {
+
+    // Get user id from app cache
+    await this.getCurrentUser();
+    console.log(this.state.userId);
+
+    this.setState({isLoading: true});
+
+    // Get current locations of all pets that belong to the specified user
+    await axios.get(REQUEST_URLS.GET_CURRENT_LOCATIONS + '/' + this.state.userId)
+      .then((response) => {
+        const data = response.data.results;
+        console.log(data);
+        // Convert returned results into list of objects to be used to display as marker on map
+        var newLocationList = [];
+        for(var i = 0; i < data.length; i++) {
+          const objectToAdd = {
+            name: data[i].petName,
+            latitude: data[i].latitude,
+            longitude: data[i].longitude,
+            address: data[i].address,
+            latestUpdate: data[i].lastSeenDate
+          };
+          newLocationList.push(objectToAdd);
+        }
+        this.setState({isLoading: false, coordinates: newLocationList});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        console.log(error.response);
+        Alert.alert('Error', error.message);
+        this.props.navigation.goBack();
+      });
   }
 
   getMapRegion = () => ({

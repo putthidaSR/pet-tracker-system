@@ -11,7 +11,7 @@ export const USER_ROLE = {
   VETERINARIAN: 'Veterinarian'
 };
 
-export const SERVER_IP_ADDRESS = 'localhost:8080';
+export const SERVER_IP_ADDRESS = '10.0.0.236:8080';
 export const REQUEST_URL_PREFIX = 'http://' + SERVER_IP_ADDRESS + '/PawTracker';
 
 // List of URI endpoints used in the app
@@ -30,5 +30,10 @@ export const REQUEST_URLS = {
   VIEW_PET_BY_RFID: REQUEST_URL_PREFIX + '/pets', // GET
 
   // Pet-related
-  VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets' // GET
+  VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets', // GET
+
+  // Locations
+  GET_ALL_LOCATIONS_FOR_PET_ID: REQUEST_URL_PREFIX + '/locations', // GET: Get locations of the specified petId
+  GET_LATEST_LOCATION_FOR_PET_ID: REQUEST_URL_PREFIX + '/locations', // GET
+  GET_CURRENT_LOCATIONS: REQUEST_URL_PREFIX + '/locations/users'
 };

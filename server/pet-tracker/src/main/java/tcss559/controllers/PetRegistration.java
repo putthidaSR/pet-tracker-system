@@ -35,7 +35,9 @@ import tcss559.model.User;
 import tcss559.request.UpdatePet;
 import tcss559.utilities.*;
 
-
+/**
+ * Root resource (exposed at "pets" path)
+ */
 @Path("/pets")
 public class PetRegistration {
 	

@@ -5,6 +5,8 @@ import { StyleSheet, Alert, Text, View, ActivityIndicator } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Polygon } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import moment from 'moment';
+import {REQUEST_URLS} from '../../Configuration';
+import axios from 'axios';
 
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
@@ -17,7 +19,8 @@ export default class PetLocationScreen extends Component {
     super(props);
       
     this.state = {
-      petId: this.props.route.params.petId,
+      // petId: this.props.route.params.petId,
+      petId: 2,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -41,8 +44,8 @@ export default class PetLocationScreen extends Component {
 
   }
     
-  componentDidMount() {
-    //this.getCurrentDeviceLocation();
+  async componentDidMount() {
+    await this.getCurrentDeviceLocation();
   }
 
   componentWillUnmount() {
@@ -54,20 +57,17 @@ export default class PetLocationScreen extends Component {
     this.setState({isLoading: true});
 
     Geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         console.log('Current position: ' + JSON.stringify(position.coords));
 
         this.setState({ 
           currentLatitude: parseFloat(position.coords.latitude),
           currentLongitude: parseFloat(position.coords.longitude)});
 
-        let region = {
-          latitude: parseFloat(position.coords.latitude),
-          longitude: parseFloat(position.coords.longitude),
-          latitudeDelta: 5,
-          longitudeDelta: 5
-        };
-        this.setState({initialRegion: region});
+        this.setState({isLoading: false});
+
+        // After getting current geolocation, attempt to call server to get locations data
+        await this.getPetLocationData();
       },
       error => {
         // eslint-disable-next-line no-console
@@ -85,6 +85,40 @@ export default class PetLocationScreen extends Component {
       const lastPosition = JSON.stringify(position);
       this.setState({lastPosition});
     });
+  }
+
+  getPetLocationData = async() => {
+
+    this.setState({isLoading: true});
+
+    // Get current locations of all pets that belong to the specified user
+    await axios.get(REQUEST_URLS.GET_ALL_LOCATIONS_FOR_PET_ID + '/' + this.state.petId, {
+      headers: {
+        'limit': 10
+      }
+    })
+      .then((response) => {
+        const data = response.data.results;
+        console.log(data);
+        // Convert returned results into list of objects to be used to display as marker on map
+        var newLocationList = [];
+        for(var i = 0; i < data.length; i++) {
+          const objectToAdd = {
+            name: data[i].petName,
+            latitude: data[i].latitude,
+            longitude: data[i].longitude,
+            address: data[i].address,
+            latestUpdate: data[i].lastSeenDate
+          };
+          newLocationList.push(objectToAdd);
+        }
+        this.setState({isLoading: false, coordinates: newLocationList});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.goBack();
+      });
   }
 
   getMapRegion = () => ({

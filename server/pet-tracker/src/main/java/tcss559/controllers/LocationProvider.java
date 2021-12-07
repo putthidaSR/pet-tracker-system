@@ -1,33 +1,29 @@
 package tcss559.controllers;
 
-import java.util.Date;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
-
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-import tcss559.hibernate.HibernateUtils;
-import tcss559.model.Pet;
-import tcss559.model.PetLocation;
-import tcss559.model.User;
+import tcss559.utilities.HandleConnection;
 
 
-@Path("/location")
+@Path("/locations")
 public class LocationProvider {
 
 	/**
@@ -47,54 +43,97 @@ public class LocationProvider {
 	 * @apiSuccess {String} active  Location data status.
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
-	 *     [
-	 *     	{
-	 *         	"id": 0,
-	 *         	"rfidNumber": "1020391293",
-	 *         	"longitude": 12.923432,
-	 *         	"latitude": 5.66666,
-	 *         	"createTime": 1293811200000,
-	 *         	"active": "Y"
-	 *     	}
-	 *     	{
-	 *         "id": 1,
-	 *         "rfidNumber": "1020391293",
-	 *         "longitude": 13.923432,
-	 *         "latitude": 4.66666,
-	 *         "createTime": 1293811200001,
-	 *         "active": "Y"
-	 *     	}
-	 *     ]
+{
+    "results": [
+        {
+            "petName": "hssel1111lohaa",
+            "latitude": 47.4556,
+            "longitude": -124.3455,
+            "address": "Test Pacific Ave Tacoma",
+            "lastSeenDate": "00-01-2011 12:00:00"
+        },
+        {
+            "petName": "hssel1111lohaa",
+            "latitude": 47.4556,
+            "longitude": -122.3455,
+            "address": "Pacific Ave Tacoma",
+            "lastSeenDate": "00-01-2011 12:00:00"
+        },
+        {
+            "petName": "hssel1111lohaa",
+            "latitude": 47.4556,
+            "longitude": -122.3455,
+            "address": "Pacific Ave Tacoma",
+            "lastSeenDate": "00-01-2011 12:00:00"
+        }
+    ]
+}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
-	@Path("/{id}/locations")
+	@Path("/{id}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getLocations(@PathParam("id") int id,
-								 @QueryParam("currentPage") int currentPage,
-								 @QueryParam("pageSize") int pageSize) {
-		System.out.println(currentPage);
-		System.out.println(pageSize);
-		Session session = HibernateUtils.getSession();
-		Query petQuery = session.createQuery("from Pet where id= :id and active = 'Y'");
-		List<Pet> petList = petQuery.setParameter("id", id).list();
-		if (petList.isEmpty()) {
-			return Response.status(Response.Status.NOT_FOUND).entity("").build();
+	public Response getLocations(@PathParam("id") int id, @DefaultValue("10") @HeaderParam("limit") int limit) {
+		
+		try {
+			
+			System.out.println("Attempt to get the list of locations for petId: " + id);
+			
+			// Establish connection to MySQL server
+			Connection connection = HandleConnection.getConnection();
+
+			PreparedStatement stmt = connection.prepareStatement(""
+					+ "SELECT pl.latitude, pl.longitude, pl.address, pl.last_seen, pd.name as pet_name "
+					+ "FROM pet_location pl, pet_detail pd "
+					+ "WHERE pd.pet_detail_id = pl.pet_id AND pd.active = 1 AND pl.pet_id = ? "
+					+ "ORDER BY last_seen DESC LIMIT ?");
+			stmt.setInt(1, id);
+			stmt.setInt(2, limit);
+
+			// Execute SQL query
+			ResultSet rs = stmt.executeQuery();
+			
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			JsonArray arr = new JsonArray();
+			
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+
+				// Each element in the array (pet with details)
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("petName", rs.getString("pet_name"));
+				eachElement.addProperty("latitude", rs.getDouble("latitude"));
+				eachElement.addProperty("longitude", rs.getDouble("longitude"));
+				eachElement.addProperty("address", rs.getString("address"));
+                eachElement.addProperty("lastSeenDate", rs.getString("last_seen"));
+
+				arr.add(eachElement);
+			}
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+			
+			JsonObject obj = new JsonObject();
+			obj.add("results", arr);
+			
+			jsonResponse = gson.toJson(obj);
+
+			connection.close();
+						
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Error Message: " + e.getLocalizedMessage())
+					.build();
 		}
-		String rfidNumber = petList.get(0).getRfidNumber();
-		System.out.println("The rfidNumber is " + rfidNumber);
-		Query query = session.createQuery("from PetLocation where rfidNumber= :rfidNumber and active = 'Y'");
-		int startNum = (currentPage - 1) * pageSize;
-		query.setFirstResult(startNum);
-		query.setMaxResults(pageSize);
-		List<PetLocation> locationList = query.setParameter("rfidNumber", rfidNumber).list();
-        session.close();
-        if (locationList.isEmpty()) {
-        	return Response.status(Response.Status.NOT_FOUND).entity("").build();
-        }
-        Gson g = new Gson();
-        String responseData = g.toJson(locationList);
-        return Response.status(Response.Status.OK).entity(responseData).build();
 	}
 	
 	
@@ -113,36 +152,171 @@ public class LocationProvider {
 	 * @apiSuccess {String} active  Location data status.
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
-	 *     {
-	 *         "id": 0,
-	 *         "rfidNumber": "1020391293",
-	 *         "longitude": 12.923432,
-	 *         "latitude": 5.66666,
-	 *         "createTime": 1293811200000,
-	 *         "active": "Y"
-	 *     }
+{
+    "petName": "hssel1111lohaa",
+    "latitude": 47.4556,
+    "longitude": -124.3455,
+    "address": "Test Pacific Ave Tacoma",
+    "lastSeenDate": "00-01-2011 12:00:00"
+}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
-	@Path("/{id}/locations/latest")
+	@Path("/{id}/latest")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getLatestLocation(@PathParam("id") int id) {
-		Session session = HibernateUtils.getSession();
-		Query petQuery = session.createQuery("from Pet where id= :id and active = 'Y'");
-		List<Pet> petList = petQuery.setParameter("id", id).list();
-		if (petList.isEmpty()) {
-			return Response.status(Response.Status.NOT_FOUND).entity("").build();
+		
+		System.out.println("Attempt to get the latest location for petId: " + id);
+		
+		try {
+
+			// Establish connection to MySQL server
+			Connection connection = HandleConnection.getConnection();
+			
+			PreparedStatement stmt = connection.prepareStatement(""
+					+ "SELECT pl.latitude, pl.longitude, pl.address, pl.last_seen, pd.name as pet_name "
+					+ "FROM pet_location pl, pet_detail pd "
+					+ "WHERE pd.pet_detail_id = pl.pet_id AND pd.active = 1 AND pl.pet_id = ? "
+					+ "ORDER BY last_seen DESC LIMIT 1");
+			stmt.setInt(1, id);
+
+			// Execute SQL query
+			ResultSet rs = stmt.executeQuery();
+			
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			JsonObject obj = new JsonObject();
+
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+
+				// Each element in the array (pet with details)
+				obj.addProperty("petName", rs.getString("pet_name"));
+				obj.addProperty("latitude", rs.getDouble("latitude"));
+				obj.addProperty("longitude", rs.getDouble("longitude"));
+				obj.addProperty("address", rs.getString("address")); 
+                obj.addProperty("lastSeenDate", rs.getString("last_seen"));
+			}
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+			
+			jsonResponse = gson.toJson(obj);
+
+			connection.close();
+						
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Error Message: " + e.getLocalizedMessage())
+					.build();
 		}
-		String rfidNumber = petList.get(0).getRfidNumber();
-		Query query = session.createSQLQuery("select * from pet_location where rfid_number = :rfidNumber and active = 'Y' ORDER BY id desc LIMIT 1");
-		List<PetLocation> locationList = query.setParameter("rfidNumber", rfidNumber).list();
-        session.close();
-        if (locationList.isEmpty()) {
-        	return Response.status(Response.Status.NOT_FOUND).entity("").build();
+	}
+	
+	/**
+	 * Returns list of locations of all pets that belong to the specified user.
+	 * 
+	 * {
+    "results": [
+        {
+            "petId": 2,
+            "petName": "hssel1111lohaa",
+            "petRFID": "1AV1112",
+            "latitude": 47.4556,
+            "longitude": -124.3455,
+            "address": "Test Pacific Ave Tacoma",
+            "lastSeenDate": "00-01-2011 12:00:00"
+        },
+        {
+            "petId": 3,
+            "petName": "test2",
+            "petRFID": "2234455555",
+            "latitude": 47.4556,
+            "longitude": -122.3455,
+            "address": "Pacific Ave Tacoma",
+            "lastSeenDate": "00-01-2011 12:00:00"
         }
-        Gson g = new Gson();
-        String responseData = g.toJson(locationList.get(0));
-        return Response.status(Response.Status.OK).entity(responseData).build();
+    ]
+}
+	 * @param id
+	 * @return
+	 */
+	@Path("/users/{user_id}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getLatestLocationAllPets(@PathParam("user_id") int id) {
+		
+		try {
+			
+			// Establish connection to MySQL server
+			Connection connection = HandleConnection.getConnection();
+			
+			String sql = "SELECT DISTINCT "
+					+ "p.id AS pet_id, pd.name AS pet_name, p.rfid_number, "
+					+ "pl.latitude, pl.longitude, pl.address, pl.last_seen "
+					+ "FROM user u "
+					+ "LEFT JOIN pet p ON u.id = p.user_id "
+					+ "LEFT JOIN pet_detail pd ON p.id = pd.pet_detail_id "
+					+ "LEFT JOIN pet_location pl ON p.id = pl.pet_id "
+					+ "WHERE u.id = ? AND pd.active = 1 AND pl.id "
+					+ "IN (SELECT MAX(id) FROM pet_location GROUP BY pet_id)";
+			
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			stmt.setInt(1, id);
+
+			// Execute SQL query
+			ResultSet rs = stmt.executeQuery();
+			
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			JsonArray arr = new JsonArray();
+
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+
+				// Each element in the array (pet with details)
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("petId", rs.getInt("pet_id"));
+				eachElement.addProperty("petName", rs.getString("pet_name"));
+				eachElement.addProperty("petRFID", rs.getString("rfid_number"));
+				eachElement.addProperty("latitude", rs.getDouble("latitude"));
+				eachElement.addProperty("longitude", rs.getDouble("longitude"));
+				eachElement.addProperty("address", rs.getString("address"));  
+				eachElement.addProperty("lastSeenDate", rs.getString("last_seen"));
+
+				arr.add(eachElement);
+			}
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+
+			JsonObject obj = new JsonObject();
+			obj.add("results", arr);
+
+			jsonResponse = gson.toJson(obj);
+
+			connection.close();
+			
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+		
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Error Message: " + e.getLocalizedMessage())
+					.build();
+		}
 	}
 
 	

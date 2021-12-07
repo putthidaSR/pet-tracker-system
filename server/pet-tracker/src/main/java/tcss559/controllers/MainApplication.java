@@ -21,9 +21,9 @@ public class MainApplication extends Application {
 		resources.add(PetRegistration.class);
 		resources.add(UserRegistration.class);		
 		resources.add(AuthenticationProvider.class);
+		resources.add(LocationProvider.class);
 		resources.add(NotificationProvider.class);
 		resources.add(SearchCenter.class);
-		resources.add(LocationProvider.class);
 		resources.add(MedicalProvider.class);
 		
 		return resources;

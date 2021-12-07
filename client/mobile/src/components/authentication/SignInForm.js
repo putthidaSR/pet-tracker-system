@@ -29,7 +29,7 @@ export default class SignInForm extends Component {
    * Check if user is successfully logged in to the app.
    */
   async handleSignInUser() {
-
+    console.log('signin');
     if (this.state.username.length === 0 || this.state.password.length === 0) {
       Alert.alert(
         'Fail to sign-in',
@@ -82,15 +82,15 @@ export default class SignInForm extends Component {
       console.log('Error sign-in user', error.request);
       this.setState({isLoading: false});
 
-      if (error.response.status === 404) {
-        Alert.alert(
-          'Fail to Login',
-          'No user found. Please check your username and password again.',
-          [{ text: 'OK' }],
-          { cancelable: false }
-        );
-        return;
-      }
+      // if (error.response.status === 404) {
+      //   Alert.alert(
+      //     'Fail to Login',
+      //     'No user found. Please check your username and password again.',
+      //     [{ text: 'OK' }],
+      //     { cancelable: false }
+      //   );
+      //   return;
+      // }
 
       Alert.alert(
         'Fail to Login',
