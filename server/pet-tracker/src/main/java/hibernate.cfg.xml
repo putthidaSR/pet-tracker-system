@@ -18,7 +18,7 @@
         <mapping class="tcss559.model.PetDetail"/>
         <mapping class="tcss559.model.PetLocation"/>       
         <mapping class="tcss559.model.PetVaccination"/>       
-        <mapping class="tcss559.model.PetVaccinationDetail"/>       
+        <mapping class="tcss559.model.PetMedical"/>       
 
     </session-factory>
 
