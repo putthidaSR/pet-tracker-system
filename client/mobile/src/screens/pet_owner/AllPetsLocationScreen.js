@@ -32,13 +32,14 @@ export default class PetLocationScreen extends Component {
       currentLatitude: 47.244839,
       currentLongitude: -122.437828,
       markers: [],
-      coordinates: [
-        { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
-        { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
-      ],
+      // coordinates: [
+      //   { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
+      //   { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
+      //   { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
+      //   { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
+      //   { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
+      // ],
+      coordinates: [],
       selectedIndex: 0,
       activeSlide: 0,
       isLoading: false // flag to indicate whether the screen is still loading
@@ -130,22 +131,33 @@ export default class PetLocationScreen extends Component {
 
     // Get current locations of all pets that belong to the specified user
     await axios.get(REQUEST_URLS.GET_CURRENT_LOCATIONS + '/' + this.state.userId)
-      .then((response) => {
+      .then(async(response) => {
         const data = response.data.results;
         console.log(data);
         // Convert returned results into list of objects to be used to display as marker on map
         var newLocationList = [];
         for(var i = 0; i < data.length; i++) {
+
+          // Call nominatim library to convert geolocation to address
+          const responseAddress = await axios.get('https://nominatim.openstreetmap.org/reverse?', {
+            params: { 
+              lat: data[i].latitude, lon: data[i].longitude, format: 'json'
+            }});
+          var fullAddress = responseAddress.data.display_name;
+
           const objectToAdd = {
             name: data[i].petName,
             latitude: data[i].latitude,
             longitude: data[i].longitude,
-            address: data[i].address,
-            latestUpdate: data[i].lastSeenDate
+            address: fullAddress,
+            latestUpdate: data[i].lastSeenDate,
+            weather: data[i].weather,
+            iconLink: data[i].iconLink
           };
           newLocationList.push(objectToAdd);
         }
         this.setState({isLoading: false, coordinates: newLocationList});
+        console.log(this.state.coordinates);
       })
       .catch((error) => {
         this.setState({isLoading: false});
@@ -215,15 +227,9 @@ export default class PetLocationScreen extends Component {
               item.longitude, 
               'driving')}
           >
-            <View style={{
-              width: 110,
-              height: 30,
-              alignItems: 'center',
-              backgroundColor: '#377FEA',
-              justifyContent: 'center',
-              borderRadius: 5}}>
-              <Text style={{textAlign: 'center',
-                color: 'white'}}>Get Direction</Text>
+
+            <View style={styles.directionButton}>
+              <Text style={{textAlign: 'center', color: 'white'}}>Get Direction</Text>
             </View>
           </TouchableHighlight></View>    
       </View>
@@ -265,7 +271,7 @@ export default class PetLocationScreen extends Component {
       return (
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{textAlign: 'center'}}>{'\n'}The app is loading. Please wait...</Text>
+          <Text style={{textAlign: 'center'}}>{'\n'}Getting location...{'\n'} Please wait...</Text>
         </View>
       );
     }
@@ -300,26 +306,25 @@ export default class PetLocationScreen extends Component {
                 image={require('./../../assets/images/paw.png')}
               >
                 <Callout>
-                  <View style={{width: 250, height: 200}}>
+                  <View style={{width: 300, height: 300}}>
 
                     <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 18, paddingVertical: 10}}>{marker.name}</Text>
+
+                    <Text style={{fontWeight: 'bold'}}>Latest Location Seen:</Text>
+                    <Text>{marker.address}{'\n'}</Text>
+
+                    <Text style={{fontWeight: 'bold'}}>Time Seen:</Text>
+                    <Text>{moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}{'\n'}</Text>
+
+                    <Text style={{fontWeight: 'bold'}}>Weather Condition:</Text>
+                    <Text>{marker.weather}</Text>
                     
-                    <Text>Last Seen Location: {marker.address}{'\n'}</Text>
-
-                    <Text>Last Updated: {moment(marker.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
-
-                    <TouchableHighlight
-                      style={{justifyContent: 'center', alignItems: 'center'}}
-                      onPress={() => NavigateBetweenTwoRoutes.handleGetDirections(
-                        this.state.currentLatitude, 
-                        this.state.currentLongitude, 
-                        marker.latitude, 
-                        marker.longitude, 
-                        'driving')}>
-                      <View style={styles.directionButton}>
-                        <Text style={{textAlign: 'center', color: 'white'}}>Get Direction</Text>
-                      </View>
-                    </TouchableHighlight>
+                    <View style={{justifyContent: 'center'}}>
+                      <Image
+                        style={{width: 100, height: 100}}
+                        source={{uri: 'http:' + marker.iconLink}}
+                      />
+                    </View>
                   </View>
                 </Callout>
 

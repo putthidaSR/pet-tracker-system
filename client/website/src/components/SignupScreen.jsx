@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 
 export default class SignUp extends Component {
 
@@ -44,26 +45,49 @@ export default class SignUp extends Component {
 
         console.log(requestOptions);
 
-        fetch('https://cors-anywhere.herokuapp.com/http://localhost:8080/PawTracker/users/vet', requestOptions)
-            .then(async response => {
+        // fetch('https://cors.bridged.cc/http://10.0.0.236:8080/PawTracker/users/vet', requestOptions)
+        //     .then(async response => {
+        //         console.log('success');
+        //         console.log(response);
+        //         const isJson = response.headers.get('content-type')?.includes('application/json');
+        //         const data = isJson && await response.json();
 
-                const isJson = response.headers.get('content-type')?.includes('application/json');
-                const data = isJson && await response.json();
+        //         // check for error response
+        //         if (!response.ok) {
+        //             // get error message from body or default to response status
+        //             const error = (data && data.message) || response.status;
+        //             return Promise.reject(error);
+        //         }
 
-                // check for error response
-                if (!response.ok) {
-                    // get error message from body or default to response status
-                    const error = (data && data.message) || response.status;
-                    return Promise.reject(error);
-                }
+        //         console.log('success')
+        //         alert("Success")
 
-                console.log('success')
-                alert("Success")
+        //     })
+        //     .catch(error => {
+        //         //this.setState({ errorMessage: error.toString() });
+        //         console.error('There was an error!', error);
+        //     });
 
+            axios
+            .post('https://cors.bridged.cc/http://10.0.0.236:8080/PawTracker/users/vet', {
+              body: JSON.stringify({ 
+                loginName: this.state.fullName,
+                loginPassword: '123456!',
+                badgeNumber: this.state.badgeNumber,
+                phoneNumber: this.state.phoneNumber,
+                email: this.state.email,
+                address: this.state.address
+            }),
+            mode: 'no-cors'
             })
-            .catch(error => {
-                //this.setState({ errorMessage: error.toString() });
-                console.error('There was an error!', error);
+            .then((response) => {
+                console.log('success');
+                console.log(response);
+                alert("Success");
+            })
+            .catch((error) => {
+                console.log("DUHH");
+                console.error(error);
             });
 
     }

@@ -20,7 +20,7 @@ export default class PetLocationScreen extends Component {
       
     this.state = {
       // petId: this.props.route.params.petId,
-      petId: 2,
+      petId: 1,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -97,22 +97,37 @@ export default class PetLocationScreen extends Component {
         'limit': 10
       }
     })
-      .then((response) => {
+      .then(async(response) => {
         const data = response.data.results;
         console.log(data);
         // Convert returned results into list of objects to be used to display as marker on map
         var newLocationList = [];
         for(var i = 0; i < data.length; i++) {
+
+          // Call nominatim library to convert geolocation to address
+          const responseAddress = await axios.get('https://nominatim.openstreetmap.org/reverse?', {
+            params: { 
+              lat: data[i].latitude, lon: data[i].longitude, format: 'json'
+            }});
+          var fullAddress = responseAddress.data.display_name;
+          
           const objectToAdd = {
             name: data[i].petName,
             latitude: data[i].latitude,
             longitude: data[i].longitude,
-            address: data[i].address,
+            address: fullAddress,
             latestUpdate: data[i].lastSeenDate
           };
           newLocationList.push(objectToAdd);
         }
         this.setState({isLoading: false, coordinates: newLocationList});
+
+        this.setState({initialRegion: {
+          latitude: newLocationList[0].latitude,
+          longitude: newLocationList[0].longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421
+        }});
       })
       .catch((error) => {
         this.setState({isLoading: false});
@@ -153,7 +168,7 @@ export default class PetLocationScreen extends Component {
       return (
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{textAlign: 'center'}}>{'\n'}The app is loading. Please wait...</Text>
+          <Text style={{textAlign: 'center'}}>{'\n'}Getting location... {'\n'}Please wait...</Text>
         </View>
       );
     }

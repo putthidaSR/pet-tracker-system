@@ -23,11 +23,11 @@ export const REQUEST_URLS = {
 
   ADD_PET_OWNER: REQUEST_URL_PREFIX + '/users/pet_owner', // POST
   GET_ALL_PET_OWNERS: REQUEST_URL_PREFIX + '/users/pet_owner', // GET
-  VIEW_PETS_BY_USER: REQUEST_URL_PREFIX + '/users', // GET - /users/{user_id}/pets
 
   // Pet registration
   REGISTER_PET: REQUEST_URL_PREFIX + '/pets',  // POST
   VIEW_PET_BY_RFID: REQUEST_URL_PREFIX + '/pets', // GET
+  VIEW_PETS_BY_USER: REQUEST_URL_PREFIX + '/pets/user', // GET - /pet/user/{user_id}
 
   // Pet-related
   VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets', // GET
