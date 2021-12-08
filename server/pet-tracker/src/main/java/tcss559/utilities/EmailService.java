@@ -6,31 +6,43 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
+/**
+ * Service functionality to send email.
+ */
 public class EmailService {
 	    
+	/**
+	 * Invoke service to send email to the specified email address.
+	 */
     public static void gmailSender(String recipient, String subject, String content) 
     		throws AddressException, MessagingException {
+    	
     	// Get a Properties object
     	Properties props = new Properties();
     	gmailssl(props);
     	final String username = "tcss559a2021@gmail.com";
     	final String password = "TCSS559A2021..";
+    	
     	Session session = Session.getDefaultInstance(props,
     	new Authenticator() {
 	    	protected PasswordAuthentication getPasswordAuthentication() {
 	    		return new PasswordAuthentication(username, password);
 	    	}
     	});
+    	
     	Message msg = new MimeMessage(session);
     	msg.setFrom(new InternetAddress(username));
     	msg.setRecipients(Message.RecipientType.TO,
     	InternetAddress.parse(recipient));
-    	msg.setSubject(subject);
-    	msg.setText(content);
-    	Transport.send(msg);
-    	System.out.println("Message sent.");
-    	}
+		msg.setSubject(subject);
+		msg.setText(content);
+		Transport.send(msg);
+		System.out.println("Message sent.");
+	}
 
+    /**
+     * Set property objects
+     */
     private static void gmailssl(Properties props) {
 	    final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	    props.put("mail.debug", "true");

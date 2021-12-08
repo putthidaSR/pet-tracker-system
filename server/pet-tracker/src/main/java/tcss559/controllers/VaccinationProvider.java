@@ -20,28 +20,32 @@ import org.hibernate.query.Query;
 import com.google.gson.Gson;
 
 import tcss559.hibernate.HibernateUtils;
-import tcss559.model.PetMedical;
+import tcss559.model.PetVaccination;
 
 /**
  * Root resource (exposed at "pets" path).
- * This resource class contains functionalities related to pet medical records.
+ * This resource class contains functionalities related to pet vaccination records.
  */
 @Path("/pets")
-public class MedicalProvider {
+public class VaccinationProvider {
 	
 	/**
-	 * @api {POST} /pets/{id}/medicals Add medical record
-	 * @apiName AddMedicalRecord
-	 * @apiGroup MedicalProvider
+	 * @api {POST} /pets/{id}/vaccinations Add vaccination record
+	 * @apiName AddVaccinationRecord
+	 * @apiGroup VaccinationProvider
 	 * 
 	 * @apiParam {Number} pet_id pet's unique ID number
-	 * @apiParam {String} medical Input text of medical record
-	 * @apiParam {Date} medicalAssignedDate Date the medical record was given
+	 * @apiParam {String} vaccinationName Name of the vaccination
+	 * @apiParam {Date} immunizationDate Date of the vaccination
+	 * @apiParam {String} veterinarianName Name of the veterinarian
+	 * @apiParam {String} veterinarianContact Contact information of the veterinarian
 	 * 
 	 * @apiParamExample {json} Request-Example:
 		{
-		    "medical": "covid vaccine",
-		    "medicalAssignedDate": "2011-03-01 01:11:23"
+		    "vaccinationName": "covid vaccine",
+		    "immunizationDate": "2011-03-01 01:11:23",
+		    "veterinarianName": "Clint Barton",
+		    "veterinarianContact": "206534566"
 		}
 		
 	 * @apiSuccess {Number} id  Vaccination's unique ID
@@ -51,11 +55,11 @@ public class MedicalProvider {
 	 *	    	"id": 1
 	 *		}
 	 */
-	@Path("/{id}/medicals")
+	@Path("/{id}/vaccinations")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response AddMedicalRecord(@PathParam("pet_id") int petId, PetMedical medical) {
+	public Response AddVaccinationRecord(@PathParam("pet_id") int petId, PetVaccination vaccination) {
 		        
         try {
         	
@@ -64,21 +68,21 @@ public class MedicalProvider {
 			Transaction t = session.beginTransaction();
 			
 			// Create new entity
-			medical.setCreateTime(new Date());
-			medical.setPetId(petId);
+			vaccination.setCreationTime(new Date());
+			vaccination.setPetId(petId);
 			
 			// Persist the entities
-			session.save(medical);
+			session.save(vaccination);
 			t.commit();
 			
-			int id = medical.getId();
-			System.out.println(medical);
+			int vaccinationId = vaccination.getId();
+			System.out.println(vaccinationId);
 			
 			session.close();
         	
         	// Return successful response if no error
 			return Response.status(Response.Status.OK)
-					.entity(id)
+					.entity(vaccinationId)
 					.build();
 						
 		} catch (Exception e) {
@@ -87,11 +91,11 @@ public class MedicalProvider {
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}
-
+	
 	/**
-	 * @api {GET} /pets/{id}/medicals View all medical records
-	 * @apiName ViewMedicalRecords
-	 * @apiGroup MedicalProvider
+	 * @api {GET} /pets/{id}/vaccinations View all vaccinations records
+	 * @apiName ViewAllVaccinationRecords
+	 * @apiGroup VaccinationProvider
 	 *
 	 * @apiParam {Number} id Pets unique ID.
 	 * @apiHeader {Number} currentPage current page.
@@ -101,10 +105,9 @@ public class MedicalProvider {
 	 *       "currentPage": 1,
 	 *       "pageSize": 10
 	 *     }
-	 *     
 	 * @apiSuccess {Number} id Medical record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} medical  Medical record.
+	 * @apiSuccess {Number} vaccination  Vaccination record.
 	 * @apiSuccess {Number} createTime  Record create time.
 	 * @apiSuccess {String} active  Record data status.
 	 * @apiSuccessExample {json} Success-Response:
@@ -113,14 +116,14 @@ public class MedicalProvider {
 	 *     	{
 	 *         	"id": 0,
 	 *         	"petId": "1020391293",
-	 *         	"medical": "cold",
+	 *         	"vaccination": "test",
 	 *         	"createTime": 1293811200000,
 	 *         	"active": "Y"
 	 *     	}
 	 *     	{
 	 *         "id": 1,
 	 *         "petId": "1020391293",
-	 *         "medical": "cold",
+	 *         "vaccination": "test",
 	 *         "createTime": 1293811200001,
 	 *         "active": "Y"
 	 *     	}
@@ -128,43 +131,40 @@ public class MedicalProvider {
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Path("/{id}/medicals")
+	@Path("/{id}/vaccinations")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response ViewMedicalRecords(@PathParam("id") int petId,
+	public Response ViewAllVaccinationRecords(@PathParam("id") int petId,
 								 @HeaderParam("currentPage") int currentPage,
 								 @HeaderParam("pageSize") int pageSize) {
 		
 		Session session = HibernateUtils.getSession();
-		Query query = session.createQuery("from pet_medical where pet_id= :petId");
+		Query query = session.createQuery("from pet_vaccination where pet_id= :petId");
 		int startNum = (currentPage - 1) * pageSize;
 		query.setFirstResult(startNum);
 		query.setMaxResults(pageSize);
 		
-		List<PetMedical> medicalList = query.setParameter("petId", petId).list();
+		List<PetVaccination> vaccinationList = query.setParameter("petId", petId).list();
         session.close();
-        
-        // Return error if no record is found
-        if (medicalList.isEmpty()) {
+        if (vaccinationList.isEmpty()) {
         	return Response.status(Response.Status.NOT_FOUND).entity("").build();
         }
-        
         Gson g = new Gson();
-        String responseData = g.toJson(medicalList);
+        String responseData = g.toJson(vaccinationList);
         return Response.status(Response.Status.OK).entity(responseData).build();
 	}
 	
 	
 	/**
-	 * @api {GET} /pets/{id}/medicals/latest View latest medical records
-	 * @apiName getMedicals
+	 * @api {GET} /pets/{id}/vaccinations/latest View latest vaccination record
+	 * @apiName ViewLatestVaccinationRecord
 	 * @apiGroup MedicalProvider
 	 *
 	 * @apiParam {Number} id Pets unique ID.
 	 * 
-	 * @apiSuccess {Number} id Medical record unique ID.
+	 * @apiSuccess {Number} id Vaccination record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} medical  Medical record.
+	 * @apiSuccess {Number} vaccination  Vaccination record.
 	 * @apiSuccess {Number} createTime  Record create time.
 	 * @apiSuccess {String} active  Record data status.
 	 * @apiSuccessExample {json} Success-Response:
@@ -172,32 +172,27 @@ public class MedicalProvider {
 	 *     	{
 	 *         "id": 1,
 	 *         "petId": "1020391293",
-	 *         "medical": "cold",
+	 *         "vaccination": "test",
 	 *         "createTime": 1293811200001,
 	 *         "active": "Y"
 	 *     	}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Path("/{id}/medicals/latest")
+	@Path("/{id}/vaccinations/latest")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response ViewLatestMedicalRecord(@PathParam("id") int petId) {
-		
+	public Response ViewLatestVaccinationRecord(@PathParam("id") int petId) {
 		Session session = HibernateUtils.getSession();
-		Query query = session.createSQLQuery("select * from pet_medical where pet_id = :petId ORDER BY id desc LIMIT 1");
-		List<PetMedical> medicalList = query.setParameter("petId", petId).list();
+		Query query = session.createSQLQuery("select * from pet_vaccination where pet_id = :petId ORDER BY id desc LIMIT 1");
+		List<PetVaccination> vaccinationList = query.setParameter("petId", petId).list();
         session.close();
-        
-        // Return error if no record is found
-        if (medicalList.isEmpty()) {
+        if (vaccinationList.isEmpty()) {
         	return Response.status(Response.Status.NOT_FOUND).entity("").build();
         }
-        
         Gson g = new Gson();
-        String responseData = g.toJson(medicalList.get(0));
+        String responseData = g.toJson(vaccinationList.get(0));
         return Response.status(Response.Status.OK).entity(responseData).build();
 	}
-	
 	
 }

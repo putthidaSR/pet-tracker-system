@@ -43,6 +43,14 @@ public class Pet {
 	@OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<PetLocation> petLocations;
 
+	public Pet(int petId) {
+		this.id = petId;
+	}
+
+	public Pet() {
+
+	}
+
 	public int getId() {
 		return id;
 	}

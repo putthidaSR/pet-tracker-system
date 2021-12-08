@@ -7,6 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+/**
+ * Model class represents the structure in pet_medical table in the paw_tracker database.
+ */
 @Entity
 @Table(name = "pet_medical")
 public class PetMedical {
@@ -20,11 +25,12 @@ public class PetMedical {
 	@Column(name = "medical")
     private String medical;
 	
-	@Column(name = "create_time")
-	private Date createTime;
+	@Column(name = "medical_assign_date")
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date medicalAssignDate;
 	
-	@Column(name = "active")
-	private String active;
+	@Column(name = "creation_time")
+	private Date createTime;
 
 	public int getId() {
 		return id;
@@ -59,14 +65,12 @@ public class PetMedical {
 		this.createTime = createTime;
 	}
 
-	public String getActive() {
-		return active;
+	public Date getMedicalAssignDate() {
+		return medicalAssignDate;
 	}
 
-	public void setActive(String active) {
-		this.active = active;
+	public void setMedicalAssignDate(Date medicalAssignDate) {
+		this.medicalAssignDate = medicalAssignDate;
 	}
-	
-	
 
 }

@@ -5,6 +5,8 @@ import { StyleSheet, Alert, Text, View, ActivityIndicator } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Polygon } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import moment from 'moment';
+import {REQUEST_URLS} from '../../Configuration';
+import axios from 'axios';
 
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
@@ -17,7 +19,8 @@ export default class PetLocationScreen extends Component {
     super(props);
       
     this.state = {
-      petId: this.props.route.params.petId,
+      // petId: this.props.route.params.petId,
+      petId: 1,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -41,8 +44,8 @@ export default class PetLocationScreen extends Component {
 
   }
     
-  componentDidMount() {
-    //this.getCurrentDeviceLocation();
+  async componentDidMount() {
+    await this.getCurrentDeviceLocation();
   }
 
   componentWillUnmount() {
@@ -54,20 +57,17 @@ export default class PetLocationScreen extends Component {
     this.setState({isLoading: true});
 
     Geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         console.log('Current position: ' + JSON.stringify(position.coords));
 
         this.setState({ 
           currentLatitude: parseFloat(position.coords.latitude),
           currentLongitude: parseFloat(position.coords.longitude)});
 
-        let region = {
-          latitude: parseFloat(position.coords.latitude),
-          longitude: parseFloat(position.coords.longitude),
-          latitudeDelta: 5,
-          longitudeDelta: 5
-        };
-        this.setState({initialRegion: region});
+        this.setState({isLoading: false});
+
+        // After getting current geolocation, attempt to call server to get locations data
+        await this.getPetLocationData();
       },
       error => {
         // eslint-disable-next-line no-console
@@ -85,6 +85,55 @@ export default class PetLocationScreen extends Component {
       const lastPosition = JSON.stringify(position);
       this.setState({lastPosition});
     });
+  }
+
+  getPetLocationData = async() => {
+
+    this.setState({isLoading: true});
+
+    // Get current locations of all pets that belong to the specified user
+    await axios.get(REQUEST_URLS.GET_ALL_LOCATIONS_FOR_PET_ID + '/' + this.state.petId, {
+      headers: {
+        'limit': 10
+      }
+    })
+      .then(async(response) => {
+        const data = response.data.results;
+        console.log(data);
+        // Convert returned results into list of objects to be used to display as marker on map
+        var newLocationList = [];
+        for(var i = 0; i < data.length; i++) {
+
+          // Call nominatim library to convert geolocation to address
+          const responseAddress = await axios.get('https://nominatim.openstreetmap.org/reverse?', {
+            params: { 
+              lat: data[i].latitude, lon: data[i].longitude, format: 'json'
+            }});
+          var fullAddress = responseAddress.data.display_name;
+          
+          const objectToAdd = {
+            name: data[i].petName,
+            latitude: data[i].latitude,
+            longitude: data[i].longitude,
+            address: fullAddress,
+            latestUpdate: data[i].lastSeenDate
+          };
+          newLocationList.push(objectToAdd);
+        }
+        this.setState({isLoading: false, coordinates: newLocationList});
+
+        this.setState({initialRegion: {
+          latitude: newLocationList[0].latitude,
+          longitude: newLocationList[0].longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421
+        }});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.goBack();
+      });
   }
 
   getMapRegion = () => ({
@@ -119,7 +168,7 @@ export default class PetLocationScreen extends Component {
       return (
         <View style={{ flex: 1, justifyContent: 'center' }}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{textAlign: 'center'}}>{'\n'}The app is loading. Please wait...</Text>
+          <Text style={{textAlign: 'center'}}>{'\n'}Getting location... {'\n'}Please wait...</Text>
         </View>
       );
     }
