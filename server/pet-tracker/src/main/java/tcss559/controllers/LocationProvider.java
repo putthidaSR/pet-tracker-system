@@ -3,8 +3,6 @@ package tcss559.controllers;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -21,53 +19,51 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import tcss559.utilities.HandleConnection;
+import tcss559.utilities.WeatherService;
 
-
+/**
+ * Root resource (exposed at "locations" path).
+ * This resource class contains functionalities related to location lookup.
+ */
 @Path("/locations")
 public class LocationProvider {
 
 	/**
-	 * @api {GET} /pets/:id/locations?currentPage=:currentPage&pageSize=:pageSize Request locations information
+	 * @api {GET} /locations/{id} Request locations information of specified pet
 	 * @apiName getLocations
 	 * @apiGroup LocationProvider
-	 *
-	 * @apiParam {Number} id Pets unique ID.
-	 * @apiParam {Number} currentPage current page.
-	 * @apiParam {Number} pageSize page size.
 	 * 
-	 * @apiSuccess {Number} id Location record unique ID.
-	 * @apiSuccess {String} rfidNumber Related rfidNumber unique ID.
-	 * @apiSuccess {Number} longitude  Pet longitude.
-	 * @apiSuccess {Number} latitude Pet latitude.
-	 * @apiSuccess {Number} createTime  Location create time.
-	 * @apiSuccess {String} active  Location data status.
+	 * @apiHeader {Number} limit Maximum number of locations to return
+	 * 
+	 * @apiParam {Number} id Pets unique ID.
+	 * 
+	 * 
+	 * @apiSuccess {String} petName Name of the pet.
+	 * @apiSuccess {Number} longitude  Longitude of the pet's location.
+	 * @apiSuccess {Number} latitude Latitude of the pet's location.
+	 * @apiSuccess {String} address  Address of the pet's location
+	 * @apiSuccess {String} lastSeenDate  Date/time that the pet was seen in the specified location (format: YYYY-MM-DD hh:mm:ss)
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
-	 *     HTTP/1.1 200 OK
-{
-    "results": [
-        {
-            "petName": "hssel1111lohaa",
-            "latitude": 47.4556,
-            "longitude": -124.3455,
-            "address": "Test Pacific Ave Tacoma",
-            "lastSeenDate": "00-01-2011 12:00:00"
-        },
-        {
-            "petName": "hssel1111lohaa",
-            "latitude": 47.4556,
-            "longitude": -122.3455,
-            "address": "Pacific Ave Tacoma",
-            "lastSeenDate": "00-01-2011 12:00:00"
-        },
-        {
-            "petName": "hssel1111lohaa",
-            "latitude": 47.4556,
-            "longitude": -122.3455,
-            "address": "Pacific Ave Tacoma",
-            "lastSeenDate": "00-01-2011 12:00:00"
-        }
-    ]
-}
+	 *      HTTP/1.1 200 OK
+			{
+			    "results": [
+			        {
+				    	"petName": "Violet",
+					    "latitude": 47.4567856,
+					    "longitude": -124.344555,
+					    "address": "1132, Pacific Ave, Tacoma, WA, 98404",
+					    "lastSeenDate": "2021-12-07 15:07:05"
+			        },
+			        {
+				    	"petName": "Bella",
+					    "latitude": 47.454356,
+					    "longitude": -124.345455,
+					    "address": "4532, Pacific Ave, Tacoma, WA, 98404",
+					    "lastSeenDate": "2021-12-08 15:07:05"
+			        }
+			    ]
+			}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@Path("/{id}")
@@ -82,6 +78,7 @@ public class LocationProvider {
 			// Establish connection to MySQL server
 			Connection connection = HandleConnection.getConnection();
 
+			// Returns the list of location records of the specified pet ID
 			PreparedStatement stmt = connection.prepareStatement(""
 					+ "SELECT pl.latitude, pl.longitude, pl.address, pl.last_seen, pd.name as pet_name "
 					+ "FROM pet_location pl, pet_detail pd "
@@ -119,9 +116,9 @@ public class LocationProvider {
 				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
 			}
 			
+			// Format to return: Array of objects
 			JsonObject obj = new JsonObject();
 			obj.add("results", arr);
-			
 			jsonResponse = gson.toJson(obj);
 
 			connection.close();
@@ -138,27 +135,27 @@ public class LocationProvider {
 	
 	
 	/**
-	 * @api {GET} /pets/:id Request latest location information
+	 * @api {GET} /locations/{id}/latest Request latest location information of specified pet
 	 * @apiName getLatestLocation
 	 * @apiGroup LocationProvider
 	 *
 	 * @apiParam {Number} id Pets unique ID.
 	 *
-	 * @apiSuccess {Number} id Location record unique ID.
-	 * @apiSuccess {String} rfidNumber Related rfidNumber unique ID.
-	 * @apiSuccess {Number} longitude  Pet longitude.
-	 * @apiSuccess {Number} latitude Pet latitude.
-	 * @apiSuccess {Number} createTime  Location create time.
-	 * @apiSuccess {String} active  Location data status.
+	 * @apiSuccess {String} petName Name of the pet.
+	 * @apiSuccess {Number} longitude  Longitude of the pet's location.
+	 * @apiSuccess {Number} latitude Latitude of the pet's location.
+	 * @apiSuccess {String} address  Address of the pet's location
+	 * @apiSuccess {String} lastSeenDate  Date/time that the pet was seen in the specified location (format: YYYY-MM-DD hh:mm:ss)
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
-	 *     HTTP/1.1 200 OK
-{
-    "petName": "hssel1111lohaa",
-    "latitude": 47.4556,
-    "longitude": -124.3455,
-    "address": "Test Pacific Ave Tacoma",
-    "lastSeenDate": "00-01-2011 12:00:00"
-}
+	 *      HTTP/1.1 200 OK
+			{
+			    "petName": "Bella",
+			    "latitude": 47.4556,
+			    "longitude": -124.3455,
+			    "address": "4432, Pacific Ave, Tacoma, WA, 98404",
+			    "lastSeenDate": "2021-12-07 15:07:05"
+			}
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@Path("/{id}/latest")
@@ -173,6 +170,7 @@ public class LocationProvider {
 			// Establish connection to MySQL server
 			Connection connection = HandleConnection.getConnection();
 			
+			// Return the latest location with details of the specified pet ID
 			PreparedStatement stmt = connection.prepareStatement(""
 					+ "SELECT pl.latitude, pl.longitude, pl.address, pl.last_seen, pd.name as pet_name "
 					+ "FROM pet_location pl, pet_detail pd "
@@ -219,34 +217,55 @@ public class LocationProvider {
 					.build();
 		}
 	}
-	
+
 	/**
-	 * Returns list of locations of all pets that belong to the specified user.
+	 * @api {GET} /locations/users/{user_id} Request latest locations of all pets belong to specified user
+	 * @apiName getLatestLocationAllPets
+	 * @apiGroup LocationProvider
+	 *
+	 * @apiParam {Number} user_id Unique user ID.
+	 *
+	 * @apiSuccess {Number} petId Unique ID of each pet.
+	 * @apiSuccess {String} petName Name of the pet.
+	 * @apiSuccess {String} petRFID Pet's RFID tag number.
+	 * @apiSuccess {Number} longitude  Longitude of the pet's location.
+	 * @apiSuccess {Number} latitude Latitude of the pet's location.
+	 * @apiSuccess {String} address  Address of the pet's location
+	 * @apiSuccess {String} lastSeenDate  Date/time that the pet was seen in the specified location (format: YYYY-MM-DD hh:mm:ss)
+	 * @apiSuccess {String} weather Weather condition of the pet's location
+	 * @apiSuccess {String} iconLink HTTP link to the icon that represents the weather condition
 	 * 
-	 * {
-    "results": [
-        {
-            "petId": 2,
-            "petName": "hssel1111lohaa",
-            "petRFID": "1AV1112",
-            "latitude": 47.4556,
-            "longitude": -124.3455,
-            "address": "Test Pacific Ave Tacoma",
-            "lastSeenDate": "00-01-2011 12:00:00"
-        },
-        {
-            "petId": 3,
-            "petName": "test2",
-            "petRFID": "2234455555",
-            "latitude": 47.4556,
-            "longitude": -122.3455,
-            "address": "Pacific Ave Tacoma",
-            "lastSeenDate": "00-01-2011 12:00:00"
-        }
-    ]
-}
-	 * @param id
-	 * @return
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *     
+	 *     {
+			"results": [
+			        {
+			            "petId": 2,
+			            "petName": "hssel1111lohaa",
+			            "petRFID": "1AV1112",
+			            "latitude": 47.4586,
+			            "longitude": -124.3455,
+			            "address": "New Test Pacific Ave Tacoma",
+			            "lastSeenDate": "2021-12-07 15:07:02",
+			            "weather": "Mist",
+			            "iconLink": "http://cdn.weatherapi.com/weather/64x64/day/143.png"
+			        },
+			        {
+			            "petId": 3,
+			            "petName": "test2",
+			            "petRFID": "2234455555",
+			            "latitude": 47.4556,
+			            "longitude": -122.3455,
+			            "address": "Pacific Ave Tacoma",
+			            "lastSeenDate": "2011-01-01 00:00:00",
+			            "weather": "Mist",
+			            "iconLink": "http://cdn.weatherapi.com/weather/64x64/day/143.png"
+			        }
+			    ]
+			}
+			
+	 * @apiError(Error 404) UserNotFound The <code>id</code> of the user was not found.
 	 */
 	@Path("/users/{user_id}")
 	@GET
@@ -258,6 +277,7 @@ public class LocationProvider {
 			// Establish connection to MySQL server
 			Connection connection = HandleConnection.getConnection();
 			
+			// Returns the latest location with details of each pet that belongs to the specified user
 			String sql = "SELECT DISTINCT "
 					+ "p.id AS pet_id, pd.name AS pet_name, p.rfid_number, "
 					+ "pl.latitude, pl.longitude, pl.address, pl.last_seen "
@@ -293,6 +313,20 @@ public class LocationProvider {
 				eachElement.addProperty("longitude", rs.getDouble("longitude"));
 				eachElement.addProperty("address", rs.getString("address"));  
 				eachElement.addProperty("lastSeenDate", rs.getString("last_seen"));
+				
+				// Invoke weather web service to get weather info of that particular location
+				String data = WeatherService.getCurrentWeather(rs.getDouble("latitude"), rs.getDouble("longitude"));
+				
+				Gson g = new Gson();
+				JsonObject obj = g.fromJson(data, JsonObject.class);
+				JsonObject current = g.fromJson(obj.get("current"), JsonObject.class);
+				JsonObject condition = g.fromJson(current.get("condition"), JsonObject.class);
+				String weather = condition.get("text").getAsString();
+				String iconLink = condition.get("icon").getAsString();
+				
+				// Add weather info to response object
+				eachElement.addProperty("weather", weather);
+				eachElement.addProperty("iconLink", iconLink);
 
 				arr.add(eachElement);
 			}
@@ -302,9 +336,9 @@ public class LocationProvider {
 				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
 			}
 
+			// Construct array of object to return as response
 			JsonObject obj = new JsonObject();
 			obj.add("results", arr);
-
 			jsonResponse = gson.toJson(obj);
 
 			connection.close();
@@ -319,5 +353,4 @@ public class LocationProvider {
 		}
 	}
 
-	
 }

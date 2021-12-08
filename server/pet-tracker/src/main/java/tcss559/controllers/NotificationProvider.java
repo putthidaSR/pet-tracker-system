@@ -78,7 +78,7 @@ public class NotificationProvider {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response sendEmailE(EmailDTO email){
+	public Response sendEmail(EmailDTO email) {
 		try {
 			EmailService.gmailSender(email.getRecipient(), email.getSubject(), email.getContent());
 		} catch (MessagingException e) {

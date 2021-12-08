@@ -8,6 +8,8 @@ import javax.ws.rs.core.Application;
 
 /**
  * This class is a central service API endpoint which hosts the default base URI.
+ * 
+ * @author Jiawei Yao & Putthida Samrith
  */
 @ApplicationPath("/PawTracker")
 public class MainApplication extends Application {
@@ -25,6 +27,7 @@ public class MainApplication extends Application {
 		resources.add(NotificationProvider.class);
 		resources.add(SearchCenter.class);
 		resources.add(MedicalProvider.class);
+		resources.add(VaccinationProvider.class);
 		
 		return resources;
 	}
