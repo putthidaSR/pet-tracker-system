@@ -19,8 +19,7 @@ export default class PetLocationScreen extends Component {
     super(props);
       
     this.state = {
-      // petId: this.props.route.params.petId,
-      petId: 1,
+      petId: this.props.route.params.petId,
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,

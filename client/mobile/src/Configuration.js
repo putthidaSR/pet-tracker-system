@@ -28,9 +28,9 @@ export const REQUEST_URLS = {
   REGISTER_PET: REQUEST_URL_PREFIX + '/pets',  // POST
   VIEW_PET_BY_RFID: REQUEST_URL_PREFIX + '/pets', // GET
   VIEW_PETS_BY_USER: REQUEST_URL_PREFIX + '/pets/user', // GET - /pet/user/{user_id}
-
-  // Pet-related
   VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets', // GET
+  UPDATE_PET_DETAILS: REQUEST_URL_PREFIX + '/pets', // PUT
+  DELETE_PET_BY_ID: REQUEST_URL_PREFIX + '/pets', // DELETE
 
   // Locations
   GET_ALL_LOCATIONS_FOR_PET_ID: REQUEST_URL_PREFIX + '/locations', // GET: Get locations of the specified petId

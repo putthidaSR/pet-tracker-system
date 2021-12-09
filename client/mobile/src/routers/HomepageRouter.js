@@ -10,7 +10,6 @@ import HomepageScreen from '../screens/HomepageScreen';
 import AccountScreen from '../screens/AccountScreen';
 
 // For homepage stack
-import WeatherInfoScreen from '../screens/pet_owner/WeatherInfoScreen';
 import PetLocationScreen from '../screens/pet_owner/AllPetsLocationScreen';
 import ViewMyPetsScreen from '../screens/pet_owner/ViewMyPetsScreen';
 import EachPetLocationScreen from '../screens/pet_owner/EachPetLocationScreen';
@@ -60,21 +59,6 @@ function HomepageBottomTab() {
             <Image
               style={{ width: 25, height: 25, resizeMode: 'contain'}}
               source={require('./../assets/images/home.png')}
-            />          
-          )
-        }}
-      />
-
-      <MainBottomTab.Screen 
-        name="ViewMyPetsScreen" 
-        component={ViewMyPetsScreen}
-        options={{
-          headerShown: false,
-          tabBarLabel: 'View My Pets',
-          tabBarIcon: () => (
-            <Image
-              style={{ width: 25, height: 25, resizeMode: 'contain'}}
-              source={require('./../assets/images/paw.png')}
             />          
           )
         }}
@@ -153,19 +137,6 @@ function HomepageStack() {
       <Stack.Screen name="PetLocationScreen" component={PetLocationScreen} options={({ navigation }) => ({
         headerShown: true,
         headerTitle: 'Track All My Pets',
-        headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
-        headerStyle: {backgroundColor: '#F5C945'},
-        headerLeft: () => (
-          <TouchableOpacity style={{marginLeft: 15}}><Icon name="arrow-back" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
-        ),
-        headerRight: () => (
-          <TouchableOpacity style={{marginRight: 15}}><Icon name="home" color="white" onPress={() => navigation.navigate('HomepageScreen')} /></TouchableOpacity>
-        )
-      })} />
-
-      <Stack.Screen name="WeatherInfoScreen" component={WeatherInfoScreen} options={({ navigation }) => ({
-        headerShown: true,
-        headerTitle: 'Should I go out?',
         headerTitleStyle: {fontWeight: 'bold', color: '#0F2F44'},
         headerStyle: {backgroundColor: '#F5C945'},
         headerLeft: () => (

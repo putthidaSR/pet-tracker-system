@@ -1,8 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from "react";
-import { StyleSheet, ActivityIndicator, ScrollView, Alert, TouchableOpacity, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
+import { StyleSheet, ActivityIndicator, ScrollView, Alert, Switch, TextInput, SafeAreaView, Dimensions, Text, View } from "react-native";
 import {REQUEST_URLS, USER_BADGE_NUMBER_STORAGE} from '../../Configuration';
-import { Button, ButtonGroup } from 'react-native-elements';
+import { Button, ButtonGroup, Icon } from 'react-native-elements';
 import axios from 'axios';
 import { Table, Row } from 'react-native-table-component';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,7 +22,7 @@ export default class ViewAllPets extends Component {
       badgeNumber: '',
       rfidNumber: '',
       searchByOption: 0,
-      tableHeader: ['User', 'Pet Name', 'RFID #', 'Active', 'Contact'],
+      tableHeader: ['User', 'Pet Name', 'RFID #', 'Active', 'Delete'],
       tableData: [],
 
       // For dropdown user list
@@ -74,6 +74,61 @@ export default class ViewAllPets extends Component {
   }
 
   /**
+   * Update RFID status of the specified pet.
+   */
+  handleUpdateRfidStatus = async (id, status) => {
+
+    console.log('Attempt to update pet with ID ' + id + ' to status: ' + !status);
+    this.setState({isLoading: true});
+    
+    await axios({
+      url: REQUEST_URLS.UPDATE_PET_DETAILS + '/' + id,
+      method: 'PUT',
+      data: {
+        active: !status
+      }
+    })
+      .then(() => {
+        this.setState({isLoading: false});
+        console.log(id, 'successfully updated!');
+  
+        this.getAllPetsWithDetails();
+        Alert.alert('RFID status has successfully updated.');
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
+  }
+  
+  /**
+   * Delete the specified pet ID from the database.
+   */
+  handleDeletePet = async (id) => {
+
+    console.log('Attempt to delete pet', id);
+    this.setState({isLoading: true});
+    
+    await axios({
+      url: REQUEST_URLS.DELETE_PET_BY_ID + '/' + id,
+      method: 'DELETE'
+    })
+      .then(() => {
+        this.setState({isLoading: false});
+        console.log(id, 'successfully deleted!');
+
+        this.getAllPetsWithDetails();
+        Alert.alert('Pet is successfully deleted!');
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
+  }
+
+  /**
    * Retrieve all pets with details from database.
    */
   getAllPetsWithDetails = async () => {
@@ -105,7 +160,7 @@ export default class ViewAllPets extends Component {
         var serverData = response.data.results;
         serverData.forEach((element, index) => {
           console.log(index, element);
-          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.rfidStatus)];
+          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.petId, element.rfidStatus), this.deleteButton(element.petId)];
           newTableData.push(arrayElement);
         });
 
@@ -137,7 +192,7 @@ export default class ViewAllPets extends Component {
 
     this.setState({isLoading: true});
 
-    var url = this.state.rfidNumber !== '' ? REQUEST_URLS.VIEW_PET_BY_RFID + '/' + this.state.rfidNumber : REQUEST_URLS.VIEW_PETS_BY_USER + "/" + this.state.userId + '/pets';
+    var url = this.state.rfidNumber !== '' ? REQUEST_URLS.VIEW_PET_BY_RFID + '/' + this.state.rfidNumber : REQUEST_URLS.VIEW_PETS_BY_USER + "/" + this.state.userId;
     console.log(url);
 
     await axios.get(url)
@@ -147,7 +202,7 @@ export default class ViewAllPets extends Component {
         var serverData = response.data.results;
         serverData.forEach((element, index) => {
           console.log(index, element);
-          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.rfidStatus)];
+          var arrayElement = [element.username, element.petName, element.rfidNumber, this.elementButton(element.petId, element.rfidStatus), this.deleteButton(element.petId)];
           newTableData.push(arrayElement);
         });
 
@@ -178,17 +233,38 @@ export default class ViewAllPets extends Component {
 
   }
 
-  elementButton = (value) => (
-    <TouchableOpacity onPress={() => this._alertIndex(value)}>
-      <View style={styles.btn}>
-        <Text style={styles.btnText}>Active</Text>
-      </View>
-    </TouchableOpacity>
+  /**
+   * Render how the switch button in table will display
+   */
+  elementButton = (id, status) => (
+    <View style={{alignItems: 'center'}}>
+      <Switch
+        trackColor={{ false: '#767577', true: '#green' }}
+        ios_backgroundColor="#3e3e3e"
+        value={status}
+        onValueChange={() => {
+          this.handleUpdateRfidStatus(id, status);
+        }}
+      />
+    </View>
+
   );
 
-  _alertIndex(index) {
-    Alert.alert(`This is row ${index + 1}`);
-  }
+  /**
+   * Render how the delete button in the table will display
+   */
+  deleteButton = (id) => (
+    <View style={{alignItems: 'center'}}>
+      <Icon
+        raised
+        name='trash'
+        type='font-awesome'
+        color='red'
+        size={15}
+        onPress={() => this.handleDeletePet(id)} />
+    </View>
+    
+  );
 
   setOpen = (open) => {
     this.setState({
@@ -333,20 +409,6 @@ export default class ViewAllPets extends Component {
 
                 <ScrollView style={styles.dataWrapper}>
                   <Table borderStyle={{borderWidth: 1}}>
-                    {/* {
-                      state.tableData.map((rowData, index) => (
-                        <TableWrapper key={index} style={styles.row}>
-                          {
-                            rowData.map((cellData, cellIndex) => (
-
-                              <Cell key={cellIndex} 
-                                data={cellIndex === 3 ? element(cellData, index) : cellData} 
-                                textStyle={{...styles.text, fontSize: 12, color: 'black'}} />
-                            ))
-                          }
-                        </TableWrapper>
-                      ))
-                    } */}
 
                     {
                       this.state.tableData.map((rowData, index) => (
@@ -405,10 +467,8 @@ const styles = StyleSheet.create({
   },
 
   head: { height: 40, backgroundColor: '#0F2F44' },
-  text: { margin: 6, color: 'white', fontWeight: 'bold' },
-  row: { flexDirection: 'row', backgroundColor: '#FFF1C1' },
-  btn: { width: 58, height: 18, backgroundColor: '#78B7BB',  borderRadius: 2 },
-  btnText: { textAlign: 'center', color: '#fff' },
+  text: { margin: 6, color: 'white', fontWeight: 'bold'},
+  row: { flexDirection: 'row', backgroundColor: '#FFF1C1', height: 40 },
   dataWrapper: { marginTop: -1 }
 
 });

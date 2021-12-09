@@ -130,7 +130,6 @@ export default class HomepageScreen extends Component {
             <View style={styles.buttonContainer}>
               {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
               {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
-              {/* {this.renderMenuOption("Should We Go Out?", 'WeatherInfoScreen', require('./../assets/images/go-out.png'))}  */}
             </View>
         }
 
