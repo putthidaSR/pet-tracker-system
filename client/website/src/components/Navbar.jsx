@@ -1,32 +1,38 @@
+/* eslint-disable jsx-a11y/alt-text */
 import React, {Component} from 'react';
-import { Menu, Typography } from 'antd';
 import { Link } from 'react-router-dom';
-import { HomeOutlined, MoneyCollectOutlined, FundOutlined } from '@ant-design/icons';
+import appLogo from '../assets/app-logo.png';
 
+/**
+ * Component to display the navigation bar at the top of the page.
+ */
 export default class Navbar extends Component {
 
     render() {
         return (
-            <div className="nav-container">
-                <div className="logo-container">
-                    {/* <Avatar src={icon} size="large" /> */}
-                    <Typography.Title level={2} className="logo"><Link to="/">Pet Tracker System</Link></Typography.Title>
-                    {/* <Button className="menu-control-container" onClick={() => setActiveMenu(!activeMenu)}><MenuOutlined /></Button> */}
-                </div>
 
-                <Menu theme="dark">
-                    <Menu.Item icon={<HomeOutlined />}>
-                        <Link to="/">Home</Link>
-                    </Menu.Item>
-
-                    <Menu.Item icon={<FundOutlined />}>
-                        <Link to="/register">Register New Pet</Link>
-                    </Menu.Item>
-                    
-                    <Menu.Item icon={<MoneyCollectOutlined />}>
-                        <Link to="/view">View All Pets</Link>
-                    </Menu.Item>
-                </Menu>
+            <div>
+                <nav className="navbar navbar-expand-lg navbar-light fixed-top">
+                    <div className="container"> 
+                        {/** Display app logo */}
+                        <div class="center-image" style={{width: 100, height: 100}}>
+                            <img src={appLogo} />
+                        </div>
+                        <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
+                            <ul className="navbar-nav ml-auto">
+                                <li className="nav-item">
+                                    <Link className="nav-link" to={"/"}><label style={{marginLeft: '10rem', fontSize: 20}}>View All Veterinarians    |   </label></Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to={"/register"}><label style={{fontSize: 20}}>Register Veterinarian    |   </label></Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to={"/login"}><label style={{fontSize: 20}}>Log Out</label></Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
             </div>
         );
     }
