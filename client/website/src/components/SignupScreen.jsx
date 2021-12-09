@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import axios from "axios";
+import Navbar from "./Navbar";
+import { Alert } from 'antd';
 
+/**
+ * This class renders the components to register the veterinarian and call the API to insert new record to the database.
+ * 
+ * Date: 12/9/2021
+ * Author: Putthida Samrith
+ */
 export default class SignUp extends Component {
 
     constructor(props) {
@@ -11,95 +19,74 @@ export default class SignUp extends Component {
             badgeNumber: '',
             email: '',
             phoneNumber: '',
-            address: ''
+            address: '',
+            isAdded: false
         }
     }
 
-    handleSignUp = (event) => {
+    /**
+     * Handle the action when user presses register.
+     */
+    handleSignUp = async(event) => {
+
         event.preventDefault();
-        console.log('You clicked submit.', event);
 
-        let formData = new FormData();    //formdata object
-        formData.append('loginName', this.state.fullName);   //append the values with key, value pair
-        formData.append('loginPassword', '123456!');
-        formData.append('badgeNumber', this.state.badgeNumber);
-
-        // POST request using fetch with error handling
-        const requestOptions = {
+        // Construct request option (method, request body)
+        const options = {
             method: 'POST',
-            headers: { 'Access-Control-Allow-Origin': '*', 'Accept': 'application/json',
-            'Content-Type': 'application/json'},
-          //  body: formData,
-            body: JSON.stringify({ 
+            url: 'http://localhost:8080/PawTracker/users/vet',
+            data: {
                 loginName: this.state.fullName,
                 loginPassword: '123456!',
                 badgeNumber: this.state.badgeNumber,
                 phoneNumber: this.state.phoneNumber,
                 email: this.state.email,
                 address: this.state.address
-            }),
+            },
             mode: 'no-cors'
         };
 
+        await axios(options)
+        .then((response) => {
+            console.log("success");
+            this.setState({isAdded: true});
 
-
-        console.log(requestOptions);
-
-        // fetch('https://cors.bridged.cc/http://10.0.0.236:8080/PawTracker/users/vet', requestOptions)
-        //     .then(async response => {
-        //         console.log('success');
-        //         console.log(response);
-        //         const isJson = response.headers.get('content-type')?.includes('application/json');
-        //         const data = isJson && await response.json();
-
-        //         // check for error response
-        //         if (!response.ok) {
-        //             // get error message from body or default to response status
-        //             const error = (data && data.message) || response.status;
-        //             return Promise.reject(error);
-        //         }
-
-        //         console.log('success')
-        //         alert("Success")
-
-        //     })
-        //     .catch(error => {
-        //         //this.setState({ errorMessage: error.toString() });
-        //         console.error('There was an error!', error);
-        //     });
-
-            axios
-            .post('https://cors.bridged.cc/http://10.0.0.236:8080/PawTracker/users/vet', {
-              body: JSON.stringify({ 
-                loginName: this.state.fullName,
-                loginPassword: '123456!',
-                badgeNumber: this.state.badgeNumber,
-                phoneNumber: this.state.phoneNumber,
-                email: this.state.email,
-                address: this.state.address
-            }),
-            mode: 'no-cors'
-            })
-            .then((response) => {
-                console.log('success');
-                console.log(response);
-                alert("Success");
-            })
-            .catch((error) => {
-                console.log("DUHH");
-                console.error(error);
-            });
-
+        }, (error) => {
+            if (error.response) {
+                // client received an error response (5xx, 4xx)
+                console.log(error.response);
+                } else if (error.request) {
+                // client never received a response, or request never left
+                console.log(error.request);
+                } else {
+                console.error(error.message);
+            }
+        });
     }
 
     render() {
         return (
             <div className="auth-inner">
 
+                {/** Display navigation menu bar */}
+                <Navbar />
+
+                {/** Display alert message when user is successfully added */}
+                {
+                    this.state.isAdded && <div style={{height: 100}}>
+                        <Alert
+                            message="Success"
+                            description="New veterinarian has been added to the system."
+                            type="success"
+                            showIcon/>
+                    </div>
+                }
+
+                {/** Display the input form */}
                 <form onSubmit={this.handleSignUp}>
-
+                    <br />
                     <h3>Register New Veterinarian</h3>
-
+                    <br />
                     <div className="form-group">
                         <label>Full Name</label>
                         <input type="text" className="form-control" placeholder="Enter full name" 
@@ -143,9 +130,6 @@ export default class SignUp extends Component {
                     <button type="submit" className="btn btn-primary btn-block">Register</button>
 
                     <br />
-                    <p className="forgot-password text-right">
-                        Already registered? <a href="/sign-in">Sign-In</a>
-                    </p>
                 </form>
             </div>
         );
