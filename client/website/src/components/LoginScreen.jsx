@@ -9,8 +9,8 @@ import appLogo from '../assets/app-logo.png';
  * This component represents login screen when user launches the website for the first time
  * or for user who is not authenticated yet.
  * 
- * Date: 12/9/2021
- * Author: Putthida Samrith
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class Login extends Component {
 
