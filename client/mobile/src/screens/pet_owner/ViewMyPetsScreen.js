@@ -2,10 +2,9 @@
 import React, { Component } from "react";
 import { StyleSheet, SafeAreaView, Text, ScrollView, Image, View, Alert, Dimensions, ActivityIndicator } from "react-native";
 import axios from 'axios';
-import {USER_KEY_STORAGE} from '../../Configuration';
+import {USER_ID_KEY_STORAGE, REQUEST_URLS} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Button } from 'react-native-elements';
-import moment from 'moment';
 
 export default class ViewMyPetsScreen extends Component {
   
@@ -13,77 +12,97 @@ export default class ViewMyPetsScreen extends Component {
     super(props);
       
     this.state = {
+      userId: 0,
       username: '',
-      totalPetsSaved: 0,
-      petDataList: [
-        {
-          id: 1,
-          petName:'Chance',
-          latestUpdate: '2021-11-29 07:56:09'
-        },
-        {
-          id: 2,
-          petName:'Fluffy',
-          latestUpdate: '2021-11-29 07:56:09'
-        }
-      ],
+      petDataList: [],
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
   
-  componentDidMount() {
-    this.getUsername();
+  /**
+   * Get initial data
+   */
+  async componentDidMount() {
+    await this.getUserData();
+    await this.getAllPetsList();
   }
 
   /***************************************************************
-   * Get the username of the current logged-in user
+   * Get the user ID of the current logged-in user
   ****************************************************************/
-  getUsername = async () => {
+  getUserData = async () => {
     try {
-      const value = await AsyncStorage.getItem(USER_KEY_STORAGE);
-      if (value !== null) {
-        this.setState({username: value});
-        this.getAllPetsList();
+      // Retrieve user ID from app cache if exists
+      const userIdFromCache = await AsyncStorage.getItem(USER_ID_KEY_STORAGE);
+      if (userIdFromCache !== null) {
+        this.setState({userId: userIdFromCache});
+      } else if (typeof this.props.route.params !== "undefined") {
+        if (this.props.route.params.id !== null) {
+          this.setState({userId: this.props.route.params.id});
+        }
       } else {
-        console.log('No user found');
-      } 
+        // Prompt user to login again
+        this.props.navigation.navigate('SignInScreen');
+        return;
+      }
     } catch (error) {
       console.log('Error getting username', error);
     }
   }
 
   /***************************************************************
-   * Get the initial summary data of each pet. 
+   * Get the initial summary data of each pet that belong to the user.
    * This is the first action to be rendered when the component is mounted.
   ****************************************************************/
   getAllPetsList = async() => {
 
     console.log('Attempt to send request to get list of pets belong to a user');
-    const URL = '' + this.state.username;
+    const URL = REQUEST_URLS.VIEW_PETS_BY_USER + '/' + this.state.userId;
     console.log('Request URL', URL);
+
     this.setState({isLoading: true});
   
-    try {
-      const response = await axios.get(URL);
-      //console.log(response.data);
-  
-      this.setState({isLoading: false});
-  
-      if (response.data.status === 200) {
-        this.setState({
-          petDataList: response.data.response,
-          totalPetsSaved: response.data.response.length
+    await axios({
+      url: URL,
+      method: 'GET'
+    })
+      .then((response) => {
+        //console.log(response.data);
+
+        let newTableData = [];
+        var serverData = response.data.results;
+
+        // loop through server response data to construct array of objects
+        serverData.forEach((element, index) => {
+          console.log(index, element);
+
+          // objects to store (will be used later in the app)
+          const objectToAdd = {
+            petName: element.petName,
+            petId: element.petId,
+            rfidNumber: element.rfidNumber,
+            rfidStatus: element.rfidStatus
+          };
+
+          // add object to array
+          newTableData.push(objectToAdd);
         });
-      }
-    } catch (error) {
-      console.log('Error getting list of pets owned', error);
-      Alert.alert('Error getting list of pets', error);
-      this.props.navigation.navigate('HomepageScreen');
-    }
+
+        this.setState({
+          petDataList: newTableData,
+          isLoading: false
+        });
+
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
   }
 
   /***************************************************************
-   * Render the card list of all pets in summary (no detail)
+   * Render the card list of all pets in summary
   ****************************************************************/
   renderAllPetsList() {
 
@@ -102,42 +121,27 @@ export default class ViewMyPetsScreen extends Component {
                 <Image style={{width: 50, height: 50}} source={require('./../../assets/images/paw.gif')} />
                 <Text style={{fontSize: 18, textAlign: 'center', fontWeight: 'bold', marginTop: 10}}>{data.petName}</Text>
               </View>
-              
-              <View style={{flexDirection: 'row', width: Dimensions.get('window').width - 100}}>
-                
-                {/* display vaccination record button */}
-                <Button
-                  containerStyle={{padding: 5, width: 160}}
-                  titleStyle={{fontSize: 13, fontWeight: 'bold'}}
-                  buttonStyle={{backgroundColor: 'green', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-                  title="Medical Record" 
-                  onPress={() => {
-                  }}
-                />
-  
-                {/* display medical record button */}
-                <Button
-                  containerStyle={{padding: 5, width: 160}}
-                  titleStyle={{fontSize: 13, fontWeight: 'bold'}}
-                  buttonStyle={{backgroundColor: 'red', borderRadius: 20, marginRight: 0, marginBottom: 0}}
-                  title="Vaccination Record"
-                  onPress={() => {
-                  }}
-                />
-              </View>
 
-              {/* display latest locations button */}
-              <Button
-                containerStyle={{padding: 5}}
-                titleStyle={{fontSize: 14, fontWeight: 'bold'}}
-                buttonStyle={{backgroundColor: '#0F2F44', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-                title="View Location History"
-                onPress={() => this.props.navigation.navigate('EachPetLocation', {
-                  petId: data.id
-                })}
-              />
-  
-              <Text style={{fontSize: 12, textAlign: 'right', padding: 5, marginTop: 5}}>Last Updated: {moment(data.latestUpdate).format('MMMM D, YYYY, HH:mm A')}</Text>
+              <View style={{paddingVertical: 3}}>
+                <Text style={{fontWeight: 'bold'}}>RFID Number: <Text>{data.rfidNumber}</Text></Text>
+                <Text style={{fontWeight: 'bold'}}>RFID Status: {data.rfidStatus ? 'Active' : 'Inactive'}</Text>
+              </View>
+              <View style={{padding: 3}}/>
+
+
+              {/* display latest locations button only if RFID is active */}
+              {
+                data.rfidStatus &&
+                  <Button
+                    containerStyle={{padding: 5}}
+                    titleStyle={{fontSize: 14, fontWeight: 'bold'}}
+                    buttonStyle={{backgroundColor: '#0F2F44', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
+                    title="View Location History"
+                    onPress={() => this.props.navigation.navigate('EachPetLocation', {
+                      petId: data.petId
+                    })}
+                  />
+              }
             </Card>
               
           ))

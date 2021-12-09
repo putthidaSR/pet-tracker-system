@@ -192,7 +192,7 @@ export default class ViewAllPets extends Component {
 
     this.setState({isLoading: true});
 
-    var url = this.state.rfidNumber !== '' ? REQUEST_URLS.VIEW_PET_BY_RFID + '/' + this.state.rfidNumber : REQUEST_URLS.VIEW_PETS_BY_USER + "/" + this.state.userId + '/pets';
+    var url = this.state.rfidNumber !== '' ? REQUEST_URLS.VIEW_PET_BY_RFID + '/' + this.state.rfidNumber : REQUEST_URLS.VIEW_PETS_BY_USER + "/" + this.state.userId;
     console.log(url);
 
     await axios.get(url)
