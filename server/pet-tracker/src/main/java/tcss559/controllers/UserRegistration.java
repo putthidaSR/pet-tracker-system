@@ -406,9 +406,9 @@ public class UserRegistration {
 				
 				// Send email to vet
 				EmailService.gmailSender(user.getEmail(), "Welcome to Paw Tracker", String.format(
-						"Hi %s, \n\nYour badge number is successfully registered to the system.\n\n"
-						+ "Please download PawTracker app to register an account as veterinarian.\n\n - Admin",
-						user.getLoginName()));
+						"Hi %s, \n\nYour badge number %s is successfully registered to the system.\n\n"
+						+ "Please download PawTracker app to register an account as veterinarian using the badge number.\n\n - Admin",
+						user.getLoginName(), user.getBadgeNumber()));
 				
 			}
 			
@@ -420,7 +420,9 @@ public class UserRegistration {
 			// Constructure JSON response from Java object
 	        Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
 	        String jsonResponse = gson.toJson(user);
-
+	        
+	        System.out.println("User is successfully registered. Return response");
+	        
 			// Return successful response if no error
 			return Response.status(Response.Status.OK)
 					.entity(jsonResponse)
@@ -429,6 +431,109 @@ public class UserRegistration {
 		} catch (Exception e) {
 			// Return expected error response
 			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to create a record")
+					.entity("Error Message: " + e.getLocalizedMessage()).build();
+		}
+	}
+	
+	/**
+	 * @api {GET} /users/vet View all veterinarians
+	 * @apiName ViewAllVeterinarians
+	 * @apiGroup UserRegistration
+	 *
+	 * @apiSuccess {Number} user_id User's unique ID.
+	 * @apiSuccess {String} username  Login name of the veterinarian
+	 * @apiSuccess {String} email User's email
+	 * @apiSuccess {String} phoneNumber User's phone number
+	 * @apiSuccess {String} address User's address
+	 * @apiSuccess {Number} active Status to identify if the user has already created an account on the mobile app
+	 * 
+	 * @apiSuccessExample {json} Success-Response:
+	 *     	HTTP/1.1 200 OK
+			{
+			    "result": [
+			        {
+			            "user_id": 14,
+			            "username": "john",
+			            "badgeNumber": "1112333",
+			            "email": "test@uw.edu",
+			            "phoneNumber": "2037966856",
+			            "address": "3456 S Pacific Ave, Tacoma, WA, 98404",
+			            "active": true
+			        },
+			        {
+			            "user_id": 15,
+			            "username": "doe",
+			            "badgeNumber": "1144111",
+			            "email": "test@gmail.com",
+			            "phoneNumber": "2065936256",
+			            "address": "4445 E Pacific Ave",
+			            "active": false
+			        }
+			    ]
+			}
+	 * @apiError(Error 404) UserNotFound No veterinarian record is found.
+	 */
+	@Path("/vet")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response ViewAllVeterinarians() {
+				
+		try { 
+			
+			// Establish connection to MySQL server
+        	Connection connection = HandleConnection.getConnection();
+        	
+        	// Construct the query to return matching record
+    		PreparedStatement stmt = connection.prepareStatement("SELECT u.id AS user_id, u.login_name, ad.badge_number, ad.email, ad.phone_number, ad.address, ad.active "
+    				+ "FROM user u, account_detail ad "
+    				+ "WHERE u.id = ad.id AND role = ?");
+    		stmt.setString(1, User.ROLE_VETERINARIAN);
+
+    		// Execute SQL query
+    		ResultSet rs = stmt.executeQuery();  
+    		
+			// Display function to show the Resultset
+			// Constructure JSON response
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // configure pretty print
+			String jsonResponse = "";
+			
+			JsonArray arr = new JsonArray();
+			
+			// Map result set returns from query
+			boolean hasRecord = false;
+			while (rs.next()) {
+				hasRecord = true;
+
+				JsonObject eachElement = new JsonObject();
+				eachElement.addProperty("user_id", rs.getInt("user_id"));
+				eachElement.addProperty("username", rs.getString("login_name"));
+				eachElement.addProperty("badgeNumber", rs.getString("badge_number"));
+				eachElement.addProperty("email", rs.getString("email"));
+				eachElement.addProperty("phoneNumber", rs.getString("phone_number"));
+				eachElement.addProperty("address", rs.getString("address"));
+				eachElement.addProperty("active", rs.getBoolean("active"));
+
+				arr.add(eachElement);
+			}	
+			
+			JsonObject obj = new JsonObject();
+			obj.add("result", arr);
+			
+			jsonResponse = gson.toJson(obj);
+
+			// Query returns no result
+			if (!hasRecord) {
+				return Response.status(Response.Status.NOT_FOUND).entity("No record found").build();
+			}
+
+			connection.close();
+
+			// Return successful response if no error
+			return Response.status(Response.Status.OK).entity(jsonResponse).build();
+
+		} catch (Exception e) {
+			// Return expected error response
+			return Response.status(Response.Status.BAD_REQUEST).entity("Failed to update a record")
 					.entity("Error Message: " + e.getLocalizedMessage()).build();
 		}
 	}

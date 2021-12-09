@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import tcss559.utilities.CORSFilter;
+
 /**
  * This class is a central service API endpoint which hosts the default base URI.
  * 
@@ -19,6 +21,9 @@ public class MainApplication extends Application {
 
 		HashSet<Class<?>> resources = new HashSet<>();
 
+		// Enable CORS in every request at run-time
+		resources.add(CORSFilter.class);
+		
 		// Add classes that to be supported by application	
 		resources.add(PetRegistration.class);
 		resources.add(UserRegistration.class);		
