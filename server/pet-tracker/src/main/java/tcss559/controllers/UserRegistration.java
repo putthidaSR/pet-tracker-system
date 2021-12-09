@@ -442,6 +442,7 @@ public class UserRegistration {
 	 *
 	 * @apiSuccess {Number} user_id User's unique ID.
 	 * @apiSuccess {String} username  Login name of the veterinarian
+	 * @apiSuccess {String| badgeNumber Veterinarian's badge number
 	 * @apiSuccess {String} email User's email
 	 * @apiSuccess {String} phoneNumber User's phone number
 	 * @apiSuccess {String} address User's address
@@ -549,7 +550,7 @@ public class UserRegistration {
 	 * @apiSuccess {String} modificationTime Last account's modification time
 	 * @apiSuccess {String} loginName Username to be used to login to the app
 	 * @apiSuccess {String} role User's role
-	 * @apiSuccess {Number} badge_number Veterinarian's badge number
+	 * @apiSuccess {Number} badgeNumber Veterinarian's badge number
 	 * @apiSuccess {String} email User's email
 	 * @apiSuccess {String} phoneNumber User's phone number
 	 * @apiSuccess {String} address User's address

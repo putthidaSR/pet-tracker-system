@@ -105,28 +105,36 @@ public class VaccinationProvider {
 	 *       "currentPage": 1,
 	 *       "pageSize": 10
 	 *     }
+	 *     
 	 * @apiSuccess {Number} id Medical record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} vaccination  Vaccination record.
-	 * @apiSuccess {Number} createTime  Record create time.
-	 * @apiSuccess {String} active  Record data status.
+	 * @apiSuccess {Date} creationTime  Record create time.
+	 * @apiSuccess {String} vaccinationName Name of the vaccination
+	 * @apiSuccess {Date} immunizationDate Date of the vaccination
+	 * @apiSuccess {String} veterinarianName Name of the veterinarian
+	 * @apiSuccess {String} veterinarianContact Contact information of the veterinarian
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *     [
-	 *     	{
-	 *         	"id": 0,
-	 *         	"petId": "1020391293",
-	 *         	"vaccination": "test",
-	 *         	"createTime": 1293811200000,
-	 *         	"active": "Y"
-	 *     	}
-	 *     	{
-	 *         "id": 1,
-	 *         "petId": "1020391293",
-	 *         "vaccination": "test",
-	 *         "createTime": 1293811200001,
-	 *         "active": "Y"
-	 *     	}
+			    {
+			        "id": 1,
+			        "petId": 1,
+			        "creationTime": "Dec 9, 2021, 6:26:36 AM",
+			        "vaccinationName": "Canine Parvovirus",
+			        "immunizationDate": "Jan 1, 2021, 12:30:00 PM",
+			        "veterinarianName": "Lakewood Animal Shelter",
+			        "veterinarianContact": "(206) 591-2543"
+			    },
+			    {
+			        "id": 2,
+			        "petId": 1,
+			        "creationTime": "Dec 9, 2021, 6:26:36 AM",
+			        "vaccinationName": "Canine Distemper",
+			        "immunizationDate": "Dec 1, 2021, 3:30:00 PM",
+			        "veterinarianName": "Lakewood Animal Shelter",
+			        "veterinarianContact": "(206) 591-2543"
+			    },
 	 *     ]
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
@@ -139,12 +147,12 @@ public class VaccinationProvider {
 								 @HeaderParam("pageSize") int pageSize) {
 		
 		Session session = HibernateUtils.getSession();
-		Query query = session.createQuery("from pet_vaccination where pet_id= :petId");
+		Query query = session.createQuery("from PetVaccination where pet_id= :pet_id");
 		int startNum = (currentPage - 1) * pageSize;
 		query.setFirstResult(startNum);
 		query.setMaxResults(pageSize);
 		
-		List<PetVaccination> vaccinationList = query.setParameter("petId", petId).list();
+		List<PetVaccination> vaccinationList = query.setParameter("pet_id", petId).list();
         session.close();
         if (vaccinationList.isEmpty()) {
         	return Response.status(Response.Status.NOT_FOUND).entity("").build();
@@ -162,20 +170,25 @@ public class VaccinationProvider {
 	 *
 	 * @apiParam {Number} id Pets unique ID.
 	 * 
-	 * @apiSuccess {Number} id Vaccination record unique ID.
+	 * @apiSuccess {Number} id Medical record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} vaccination  Vaccination record.
-	 * @apiSuccess {Number} createTime  Record create time.
-	 * @apiSuccess {String} active  Record data status.
+	 * @apiSuccess {Date} creationTime  Record create time.
+	 * @apiSuccess {String} vaccinationName Name of the vaccination
+	 * @apiSuccess {Date} immunizationDate Date of the vaccination
+	 * @apiSuccess {String} veterinarianName Name of the veterinarian
+	 * @apiSuccess {String} veterinarianContact Contact information of the veterinarian
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *     	{
-	 *         "id": 1,
-	 *         "petId": "1020391293",
-	 *         "vaccination": "test",
-	 *         "createTime": 1293811200001,
-	 *         "active": "Y"
-	 *     	}
+	 *      HTTP/1.1 200 OK
+		    {
+		        "id": 1,
+		        "petId": 1,
+		        "creationTime": "Dec 9, 2021, 6:26:36 AM",
+		        "vaccinationName": "Canine Parvovirus",
+		        "immunizationDate": "Jan 1, 2021, 12:30:00 PM",
+		        "veterinarianName": "Lakewood Animal Shelter",
+		        "veterinarianContact": "(206) 591-2543"
+		    }
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -184,7 +197,7 @@ public class VaccinationProvider {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response ViewLatestVaccinationRecord(@PathParam("id") int petId) {
 		Session session = HibernateUtils.getSession();
-		Query query = session.createSQLQuery("select * from pet_vaccination where pet_id = :petId ORDER BY id desc LIMIT 1");
+		Query query = session.createSQLQuery("select * from PetVaccination where pet_id = :petId ORDER BY id desc LIMIT 1");
 		List<PetVaccination> vaccinationList = query.setParameter("petId", petId).list();
         session.close();
         if (vaccinationList.isEmpty()) {
