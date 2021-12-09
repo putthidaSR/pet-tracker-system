@@ -104,26 +104,27 @@ public class MedicalProvider {
 	 *     
 	 * @apiSuccess {Number} id Medical record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} medical  Medical record.
-	 * @apiSuccess {Number} createTime  Record create time.
-	 * @apiSuccess {String} active  Record data status.
+	 * @apiSuccess {String} medical Input text of medical record
+	 * @apiSuccess {Date} medicalAssignedDate Date the medical record was given
+	 * @apiSuccess {Date} creationTime  Record create time.
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *     [
-	 *     	{
-	 *         	"id": 0,
-	 *         	"petId": "1020391293",
-	 *         	"medical": "cold",
-	 *         	"createTime": 1293811200000,
-	 *         	"active": "Y"
-	 *     	}
-	 *     	{
-	 *         "id": 1,
-	 *         "petId": "1020391293",
-	 *         "medical": "cold",
-	 *         "createTime": 1293811200001,
-	 *         "active": "Y"
-	 *     	}
+			    {
+			        "id": 1,
+			        "petId": 1,
+			        "medical": "Allergies: None, Diet Restriction: None",
+			        "medicalAssignDate": "Jan 1, 2021, 6:30:00 PM",
+			        "createTime": "Dec 9, 2021, 6:26:36 AM"
+			    },
+			    {
+			        "id": 2,
+			        "petId": 1,
+			        "medical": "Allergies with peanut and sweet potato",
+			        "medicalAssignDate": "Feb 1, 2021, 1:30:00 PM",
+			        "createTime": "Dec 9, 2021, 6:26:36 AM"
+			    },
 	 *     ]
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
@@ -136,12 +137,12 @@ public class MedicalProvider {
 								 @HeaderParam("pageSize") int pageSize) {
 		
 		Session session = HibernateUtils.getSession();
-		Query query = session.createQuery("from pet_medical where pet_id= :petId");
+		Query query = session.createQuery("from PetMedical where pet_id= :pet_id");
 		int startNum = (currentPage - 1) * pageSize;
 		query.setFirstResult(startNum);
 		query.setMaxResults(pageSize);
 		
-		List<PetMedical> medicalList = query.setParameter("petId", petId).list();
+		List<PetMedical> medicalList = query.setParameter("pet_id", petId).list();
         session.close();
         
         // Return error if no record is found
@@ -164,18 +165,19 @@ public class MedicalProvider {
 	 * 
 	 * @apiSuccess {Number} id Medical record unique ID.
 	 * @apiSuccess {Number} petId Related pet unique ID.
-	 * @apiSuccess {Number} medical  Medical record.
-	 * @apiSuccess {Number} createTime  Record create time.
-	 * @apiSuccess {String} active  Record data status.
+	 * @apiSuccess {String} medical Input text of medical record
+	 * @apiSuccess {Date} medicalAssignedDate Date the medical record was given
+	 * @apiSuccess {Date} creationTime  Record create time.
+	 * 
 	 * @apiSuccessExample {json} Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *     	{
-	 *         "id": 1,
-	 *         "petId": "1020391293",
-	 *         "medical": "cold",
-	 *         "createTime": 1293811200001,
-	 *         "active": "Y"
-	 *     	}
+	 *      HTTP/1.1 200 OK
+		    {
+		        "id": 1,
+		        "petId": 1,
+		        "medical": "Allergies: None, Diet Restriction: None",
+		        "medicalAssignDate": "Jan 1, 2021, 6:30:00 PM",
+		        "createTime": "Dec 9, 2021, 6:26:36 AM"
+		    }
 	 * @apiError(Error 404) UserNotFound The <code>id</code> of the Pet was not found.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -185,7 +187,7 @@ public class MedicalProvider {
 	public Response ViewLatestMedicalRecord(@PathParam("id") int petId) {
 		
 		Session session = HibernateUtils.getSession();
-		Query query = session.createSQLQuery("select * from pet_medical where pet_id = :petId ORDER BY id desc LIMIT 1");
+		Query query = session.createSQLQuery("select * from PetMedical where pet_id = :petId ORDER BY id desc LIMIT 1");
 		List<PetMedical> medicalList = query.setParameter("petId", petId).list();
         session.close();
         
