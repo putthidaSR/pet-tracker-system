@@ -16,6 +16,13 @@ const LONGITUDE_DELTA = 0.035;
 const LATITUDE = 47.244839;
 const LONGITUDE = -122.437828;
 
+/**
+ * This component renders the screen to display the latest locations of all pets that the logged in user own.
+ * Users have the ability to navigate to that location with Google map.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class PetLocationScreen extends Component {
   
   constructor(props) {

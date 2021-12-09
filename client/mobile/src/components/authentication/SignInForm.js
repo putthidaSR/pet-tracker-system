@@ -9,6 +9,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 /**************************************************************************************
  * This class renders the sign-in form that will display for unauthorized user 
  * or user who launches the app for the first time.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  **************************************************************************************/
 export default class SignInForm extends Component {
 

@@ -8,6 +8,15 @@ import { Table, Row } from 'react-native-table-component';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 
+/**
+ * This class renders the components to display all pets in the system in tabular format.
+ * This feature is only available to veterinarians. Veterination can search for pets based 
+ * on RFID tag number or by pet owner's name. Veternation also has ability to enable or display 
+ * RFID tag and delete that specified pet from the system.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class ViewAllPets extends Component {
   
   constructor(props) {

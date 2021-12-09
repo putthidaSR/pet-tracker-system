@@ -4,6 +4,9 @@ import SignInForm from './../../components/authentication/SignInForm';
 
 /**
  * This class represents the components to build sign in screen.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class SignInScreen extends Component {
 

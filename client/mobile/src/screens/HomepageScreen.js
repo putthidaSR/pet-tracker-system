@@ -4,6 +4,15 @@ import { StyleSheet, TouchableOpacity, SafeAreaView, Text, View, ActivityIndicat
 import {USER_ID_KEY_STORAGE, USER_NICKNAME_KEY_STORAGE, USER_ROLE_KEY_STORAGE, USER_ROLE} from '../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**
+ * This class renders the components to display different menu options on homescreen.
+ * Different user role (pet owner or veterinarian) will have different menu options.
+ * This screen will the first screen authenticated users see after they successfully login
+ * to the app.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class HomepageScreen extends Component {
   
   constructor(props) {

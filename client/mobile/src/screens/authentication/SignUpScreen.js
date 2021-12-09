@@ -4,6 +4,9 @@ import SignUpForm from './../../components/authentication/SignUpForm';
 
 /**
  * This class represents the components to build sign-up screen.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class SignUpScreen extends Component {
 

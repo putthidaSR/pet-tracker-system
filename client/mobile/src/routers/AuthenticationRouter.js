@@ -6,6 +6,9 @@ import HomepageRouter from './HomepageRouter';
 
 /**
  * This function component represents router for user authentication screen. 
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default function AuthenticationRouter() {
 

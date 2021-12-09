@@ -13,6 +13,13 @@ const LONGITUDE_DELTA = 0.035;
 const LATITUDE = 47.244839;
 const LONGITUDE = -122.437828;
 
+/**
+ * This component renders the screen to view the last 10 locations of the specified pet.
+ * Google map is implemented to display the markers that represent pet's location.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class PetLocationScreen extends Component {
   
   constructor(props) {

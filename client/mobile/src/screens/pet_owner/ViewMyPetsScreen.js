@@ -6,6 +6,14 @@ import {USER_ID_KEY_STORAGE, REQUEST_URLS} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Button } from 'react-native-elements';
 
+/**
+ * This component renders the screen to display the list of all pets that the logged-in user owns.
+ * User will have abilities to view medical record, vaccination record, pet's RFID tag detail and 
+ * view the last 10 locations of the specified pet.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class ViewMyPetsScreen extends Component {
   
   constructor(props) {
@@ -15,6 +23,8 @@ export default class ViewMyPetsScreen extends Component {
       userId: 0,
       username: '',
       petDataList: [],
+      vaccinationRecordsList: [],
+      medicalRecordsList: [],
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
