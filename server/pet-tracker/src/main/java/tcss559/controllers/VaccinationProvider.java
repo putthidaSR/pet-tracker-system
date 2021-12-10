@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,6 +23,7 @@ import com.google.gson.Gson;
 
 import tcss559.hibernate.HibernateUtils;
 import tcss559.model.PetVaccination;
+import tcss559.request.VaccinationUpdateDTO;
 
 /**
  * Root resource (exposed at "pets" path).
@@ -206,6 +209,77 @@ public class VaccinationProvider {
         Gson g = new Gson();
         String responseData = g.toJson(vaccinationList.get(0));
         return Response.status(Response.Status.OK).entity(responseData).build();
+	}
+	
+	/**
+	 * @api {DELETE} /vaccinations/{id} Delete a vaccination record
+	 * @apiName DeleteVaccinationRecord
+	 * @apiGroup VaccinationProvider
+	 *
+	 * @apiParam {Number} id ID of the record to be deleted
+	 * 
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	@Path("/vaccinations/{id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response DeleteVaccinationRecord(@PathParam("id") int id) {
+		
+		Session session = HibernateUtils.getSession();
+		Transaction t = session.beginTransaction();
+		
+		// disable foreign key constraints check
+		session.createSQLQuery("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+
+		// delete a record with the primary key
+		Query query = session.createSQLQuery("DELETE FROM pet_vaccination where id = :id");
+		query.setParameter("id", id);
+		query.executeUpdate();
+
+		// enable foreign key constraints check
+		session.createSQLQuery("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
+		
+		t.commit();
+        session.close();
+        return Response.status(Response.Status.OK).entity("").build();	
+	}
+	
+	
+	/**
+	 * @api {PUT} /vaccinations/{id} Update a vaccination record
+	 * @apiName UpdateVaccinationRecord
+	 * @apiGroup VaccinationProvider
+	 *
+	 * @apiParam {Number} id ID of the record to be updated
+	 * @apiParam {String} vaccinationNname pet's vaccination name
+	 * @apiParamExample {json} Request Body - Example:
+	 *		{
+	 *			"vaccinationNname": "Rabies vaccine"
+	 *     	}
+	 *     
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	@Path("/vaccinations/{id}")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response UpdateVaccinationRecord(@PathParam("id") int id, VaccinationUpdateDTO vaccinationUpdateDTO) {
+		
+		Session session = HibernateUtils.getSession();
+		Transaction t = session.beginTransaction();
+		
+		// update a record with the primary key
+		Query query = session.createSQLQuery("UPDATE pet_vaccination SET vaccination_name = :vaccinationNname  where id = :id");
+		query.setParameter("vaccinationNname", vaccinationUpdateDTO.getVaccinationName());
+		query.setParameter("id", id);
+		query.executeUpdate();		
+		t.commit();
+        session.close();
+        return Response.status(Response.Status.OK).entity("").build();	
 	}
 	
 }
