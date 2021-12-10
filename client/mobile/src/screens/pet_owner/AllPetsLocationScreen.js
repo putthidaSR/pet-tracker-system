@@ -11,6 +11,7 @@ import {REQUEST_URLS, USER_ID_KEY_STORAGE} from '../../Configuration';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Default random value (for testing)
 const LATITUDE_DELTA = 0.09;
 const LONGITUDE_DELTA = 0.035;
 const LATITUDE = 47.244839;
@@ -30,22 +31,17 @@ export default class PetLocationScreen extends Component {
       
     this.state = {
       userId: 0,
+
+      // set default location for testing
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421
       }, 
-      currentLatitude: 47.244839,
-      currentLongitude: -122.437828,
+      currentLatitude: 47.244839, // just for testing purpose
+      currentLongitude: -122.437828, // just for testing purpose
       markers: [],
-      // coordinates: [
-      //   { name: 'Fluffy', address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
-      //   { name: 'Chance', address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
-      //   { name: 'Bella', address: '1965 Polk St, Tacoma, WA 94109, USA', latitude: 47.244316, longitude: -122.436741, latestUpdate: '2021-11-29 07:56:09'},
-      //   { name: 'Bear', address: '110 Shotwell St, Tacoma, WA 98402, USA', latitude: 47.243977, longitude: -122.436660, latestUpdate: '2021-11-29 07:56:09'},
-      //   { name: 'Violet', address: '3515 Webster St, Tacoma, WA 98402, USA', latitude: 47.244280, longitude: -122.437332, latestUpdate: '2021-11-29 07:56:09'}
-      // ],
       coordinates: [],
       selectedIndex: 0,
       activeSlide: 0,
@@ -55,11 +51,17 @@ export default class PetLocationScreen extends Component {
     this.getCurrentDeviceLocation = this.getCurrentDeviceLocation.bind(this);
 
   }
-    
+  
+  /**
+   * Get initial data
+   */
   async componentDidMount() {
     await this.getCurrentDeviceLocation();
   }
 
+  /**
+   * Called immediately before a component is destroyed. This method is to perform any necessary cleanup.
+   */
   componentWillUnmount() {
     this.watchID != null && Geolocation.clearWatch(this.watchID);
   }
@@ -93,6 +95,9 @@ export default class PetLocationScreen extends Component {
     }
   }
 
+  /**
+   * Get device's current location (latitude, longitude).
+   */
   async getCurrentDeviceLocation() {
     // Initial the Map view with device's current location
     this.setState({isLoading: true});
@@ -128,6 +133,9 @@ export default class PetLocationScreen extends Component {
     });
   }
 
+  /**
+   * Fetch the list of current locations of all pets that a speicific user own.
+   */
   getPetLocationData = async() => {
 
     // Get user id from app cache
@@ -152,6 +160,7 @@ export default class PetLocationScreen extends Component {
             }});
           var fullAddress = responseAddress.data.display_name;
 
+          // construct the object: these values will be used to display as marker on the screen
           const objectToAdd = {
             name: data[i].petName,
             latitude: data[i].latitude,
@@ -174,6 +183,9 @@ export default class PetLocationScreen extends Component {
       });
   }
 
+  /**
+   * Helper method to initialize default location.
+   */
   getMapRegion = () => ({
     latitude: LATITUDE,
     longitude: LONGITUDE,
@@ -181,6 +193,9 @@ export default class PetLocationScreen extends Component {
     longitudeDelta: LONGITUDE_DELTA
   });
 
+  /**
+   * Handle the action when user presses the marker on the map by updating the carousel index.
+   */
   onMarkerPressed = (location, index) => {
     this._map.animateToRegion({
       latitude: location.latitude,
@@ -192,6 +207,9 @@ export default class PetLocationScreen extends Component {
     this._carousel.snapToItem(index);
   }
 
+  /**
+   * Handle the action when user moves the carousel item back and forth.
+   */
   onCarouselItemChange = (index) => {
     let location = this.state.coordinates[index];
     this.setState({activeSlide: index});
@@ -206,6 +224,9 @@ export default class PetLocationScreen extends Component {
     this.state.markers[index].showCallout();
   }
 
+  /**
+   * Update the location on map screen when data is changing.
+   */
   goToInitialLocation() {
     let initialRegion = Object.assign({}, this.state.initialRegion);
     initialRegion["latitudeDelta"] = 0.005;
@@ -213,6 +234,9 @@ export default class PetLocationScreen extends Component {
     this._map.animateToRegion(initialRegion, 2000);
   }
 
+  /**
+   * Render the component to display items in carousel container.
+   */
   renderCarouselItem = ({ item }) => {
     //console.log('valueeee', item, this.state.currentLatitude);
     return (
@@ -225,6 +249,7 @@ export default class PetLocationScreen extends Component {
           <Image style={{width: 40, height: 40}} source={require('./../../assets/images/paw.png')} />
         </View>
 
+        {/** Navigate to Google map to begin the routing navigation */}
         <View style={{alignItems: 'center', paddingTop: 5}}>
           <TouchableHighlight
             onPress={() => NavigateBetweenTwoRoutes.handleGetDirections(
@@ -312,6 +337,8 @@ export default class PetLocationScreen extends Component {
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
                 image={require('./../../assets/images/paw.png')}
               >
+
+                {/** Display the card when user presses on marker on the map */}
                 <Callout>
                   <View style={{width: 300, height: 300}}>
 
@@ -340,6 +367,7 @@ export default class PetLocationScreen extends Component {
           })}
         </MapView>
 
+        {/** Display the carousel container at the bottom of the screen */}
         <Carousel
           ref={(c) => { this._carousel = c; }}
           layout={'default'}

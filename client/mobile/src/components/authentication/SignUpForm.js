@@ -33,6 +33,10 @@ export default class SignUpForm extends Component {
     this.handleSignUpUser = this.handleSignUpUser.bind(this);
   }
   
+  /**
+   * Handle the action when users click on sign up.
+   * This function will call the API to update records in the database.
+   */
   async handleSignUpUser() {
 
     // Check for form validation

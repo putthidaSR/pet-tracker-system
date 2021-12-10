@@ -25,6 +25,8 @@ export default class ViewMyPetsScreen extends Component {
       petDataList: [],
       vaccinationRecordsList: [],
       medicalRecordsList: [],
+      showVaccinationModal: false,
+      showMedicalModal: false,
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
@@ -111,6 +113,60 @@ export default class ViewMyPetsScreen extends Component {
       });
   }
 
+  /**
+   * Get the list of vaccination records of the specified pet.
+   */
+  getVaccinationRecord = async (id) => {
+
+    console.log('Attempt to get vaccination record of pet ID: ' + id);
+    this.setState({isLoading: true});
+      
+    await axios({
+      url: REQUEST_URLS.VIEW_VACCINATION_RECORDS + '/' + id + '/vaccinations',
+      method: 'GET',
+      header: {
+        currentPage: `1`,
+        pageSize: `10`
+      }
+    })
+      .then((response) => {
+        console.log(id, 'success!');        
+        this.setState({vaccinationRecordsList: response.data, isLoading: false});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
+  }
+
+  /**
+   * Get the list of medical records of the specified pet.
+   */
+  getMedicalRecord = async (id) => {
+
+    console.log('Attempt to get medical record of pet ID: ' + id);
+    this.setState({isLoading: true});
+        
+    await axios({
+      url: REQUEST_URLS.VIEW_MEDICAL_RECORDS + '/' + id + '/medicals',
+      method: 'GET',
+      header: {
+        currentPage: `1`,
+        pageSize: `10`
+      }
+    })
+      .then((response) => {
+        console.log(id, 'success!');        
+        this.setState({medicalRecordsList: response.data, isLoading: false});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        Alert.alert('Error', error.message);
+        this.props.navigation.navigate('Homepage');
+      });
+  }
+
   /***************************************************************
    * Render the card list of all pets in summary
   ****************************************************************/
@@ -138,7 +194,29 @@ export default class ViewMyPetsScreen extends Component {
               </View>
               <View style={{padding: 3}}/>
 
+              <View style={{flexDirection: 'row', width: Dimensions.get('window').width - 80}}>
+                <Button
+                  containerStyle={{padding: 5, width: 172}}
+                  titleStyle={{fontSize: 17, fontWeight: 'bold'}}
+                  buttonStyle={{backgroundColor: 'green', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
+                  title="Vaccination Records" 
+                  onPress={() => {
+                    this.getVaccinationRecord(data.petId);
+                  }}
+                />
 
+                <Button
+                  containerStyle={{padding: 5, width: 172}}
+                  titleStyle={{fontSize: 17, fontWeight: 'bold'}}
+                  buttonStyle={{backgroundColor: 'red', borderRadius: 20, marginRight: 0, marginBottom: 0}}
+                  title="Medical Records" 
+                  onPress={() => {
+                    this.getMedicalRecord(data.petId);
+                  }}
+                />
+              </View>
+
+              <View style={{padding: 3}}/>
               {/* display latest locations button only if RFID is active */}
               {
                 data.rfidStatus &&

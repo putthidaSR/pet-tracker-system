@@ -44,6 +44,9 @@ export default class PetRegistrationScreen extends Component {
     this.getAllPetOwner();
   }
 
+  /**
+   * Fetch the list of all pet owners in the database.
+   */
   getAllPetOwner = async () => {
 
     this.setState({isLoading: true});

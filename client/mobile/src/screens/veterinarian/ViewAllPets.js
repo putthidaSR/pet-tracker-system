@@ -51,6 +51,9 @@ export default class ViewAllPets extends Component {
     this.getAllPetOwner();
   }
 
+  /**
+   * Fetch the list of all pet owners in the database.
+   */
   getAllPetOwner = async () => {
 
     this.setState({isLoading: true});
@@ -184,8 +187,7 @@ export default class ViewAllPets extends Component {
   }
 
   /**
-   * 
-   * @returns 
+   * Handle the action when user searches for pet based on either RFID number or username (pet owner's name).
    */
   handleSearchPets = async () => {
 

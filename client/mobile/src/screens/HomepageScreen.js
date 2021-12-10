@@ -26,6 +26,9 @@ export default class HomepageScreen extends Component {
     };
   }
   
+  /**
+   * Get initial data.
+   */
   componentDidMount() {
     this.getCurrentUser();
   }
@@ -86,7 +89,8 @@ export default class HomepageScreen extends Component {
             style={{width: 100, height: 100, resizeMode: 'contain'}}
             source={require('./../assets/images/app-logo.png')}
           />
-          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>Welcome to the largest paw community!</Text>
+          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>
+            {this.state.userRole == USER_ROLE.PET_OWNER ? 'Welcome to the largest paw community!' : 'Welcome to PawTracker, veterinarian!!!'}</Text>
         </View>
       </View>
     );
