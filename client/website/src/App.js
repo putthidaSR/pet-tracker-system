@@ -8,6 +8,9 @@ import Homepage from "./components/Homepage";
 
 /**
  * Register router for all supported components in the applications.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 function App() {
 

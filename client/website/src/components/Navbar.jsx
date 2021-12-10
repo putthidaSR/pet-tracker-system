@@ -5,6 +5,9 @@ import appLogo from '../assets/app-logo.png';
 
 /**
  * Component to display the navigation bar at the top of the page.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class Navbar extends Component {
 

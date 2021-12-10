@@ -9,6 +9,9 @@ import DropDownPicker from 'react-native-dropdown-picker';
 /**
  * This class represents the form register a new pet.
  * This component is only for authenticated user.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class PetRegistrationScreen extends Component {
   
@@ -41,6 +44,9 @@ export default class PetRegistrationScreen extends Component {
     this.getAllPetOwner();
   }
 
+  /**
+   * Fetch the list of all pet owners in the database.
+   */
   getAllPetOwner = async () => {
 
     this.setState({isLoading: true});

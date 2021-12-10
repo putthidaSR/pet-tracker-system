@@ -7,6 +7,9 @@ export const TRAVEL_MODE = {WALKING: 'walking', BICYCLING: 'bicycling', TRANSIT:
 /**
  * This class renders the component to open default map app on the device 
  * and navigate from one location to another based on the specified travel mode.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class NavigateBackToLocation extends Component {
   

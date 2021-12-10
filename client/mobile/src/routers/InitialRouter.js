@@ -10,6 +10,9 @@ import AuthenticationRouter from './AuthenticationRouter';
 /**
  * This class represents the main layout of the application.
  * It will navigate to the appropriate screens based on user's authorization.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class InitialRouter extends React.Component {
   
@@ -19,7 +22,6 @@ export default class InitialRouter extends React.Component {
 
   render() {
 
-    console.log('this.props.isUserSignedIn', this.props.isUserSignedIn);
     const Stack = createStackNavigator(); 
     
     return (
@@ -28,8 +30,7 @@ export default class InitialRouter extends React.Component {
           screenOptions={{
             headerShown: false
           }}
-           initialRouteName={this.props.isUserSignedIn ? 'Homepage' : 'Authentication'}
-          //initialRouteName={'Homepage'}
+          initialRouteName={this.props.isUserSignedIn ? 'Homepage' : 'Authentication'}
         >
           <Stack.Screen name="Authentication" component={AuthenticationRouter} />
           <Stack.Screen name="Homepage" component={HomepageRouter} />

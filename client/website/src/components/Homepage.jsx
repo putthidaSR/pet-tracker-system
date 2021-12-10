@@ -6,6 +6,10 @@ import Navbar from "./Navbar";
 
 /**
  * Render the component to display all veterinarians in tabular format.
+ * This is the first screen users see after they successfully login.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 function Homepage() {
 

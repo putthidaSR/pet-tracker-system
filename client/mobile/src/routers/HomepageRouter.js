@@ -23,6 +23,9 @@ import AuthenticationRouter from './AuthenticationRouter';
 
 /**
  * This function component will render the HomePage of the main application after user is successfully logged in.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default function HomePageNavigator() {
   return (

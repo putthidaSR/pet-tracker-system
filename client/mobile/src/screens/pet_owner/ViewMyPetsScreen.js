@@ -4,8 +4,16 @@ import { StyleSheet, SafeAreaView, Text, ScrollView, Image, View, Alert, Dimensi
 import axios from 'axios';
 import {USER_ID_KEY_STORAGE, REQUEST_URLS} from '../../Configuration';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, Button } from 'react-native-elements';
+import { Card, Button, Overlay } from 'react-native-elements';
 
+/**
+ * This component renders the screen to display the list of all pets that the logged-in user owns.
+ * User will have abilities to view medical record, vaccination record, pet's RFID tag detail and 
+ * view the last 10 locations of the specified pet.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class ViewMyPetsScreen extends Component {
   
   constructor(props) {
@@ -15,6 +23,10 @@ export default class ViewMyPetsScreen extends Component {
       userId: 0,
       username: '',
       petDataList: [],
+      vaccinationRecordsList: [],
+      medicalRecordsList: [],
+      showVaccinationModal: false,
+      showMedicalModal: false,
       isLoading: false // flag to indicate whether the screen is still loading
     };
   }
@@ -101,6 +113,62 @@ export default class ViewMyPetsScreen extends Component {
       });
   }
 
+  /**
+   * Get the list of vaccination records of the specified pet.
+   */
+  getVaccinationRecord = async (id) => {
+
+    console.log('Attempt to get vaccination record of pet ID: ' + id);
+    this.setState({isLoading: true});
+      
+    await axios({
+      url: REQUEST_URLS.VIEW_VACCINATION_RECORDS + '/' + id + '/vaccinations',
+      method: 'GET',
+      headers: {
+        currentPage: `1`,
+        pageSize: `10`
+      }
+    })
+      .then((response) => {
+        console.log(id, 'success!');        
+        this.setState({vaccinationRecordsList: response.data});
+        this.setState({showVaccinationModal: true, isLoading: false});
+      })
+      .catch((error) => {
+        console.log(error.message);
+        this.setState({isLoading: false});
+        Alert.alert('', 'No vaccination record is found.');
+      });
+  }
+
+  /**
+   * Get the list of medical records of the specified pet.
+   */
+  getMedicalRecord = async (id) => {
+
+    console.log('Attempt to get medical record of pet ID: ' + id);
+    this.setState({isLoading: true});
+        
+    await axios({
+      url: REQUEST_URLS.VIEW_MEDICAL_RECORDS + '/' + id + '/medicals',
+      method: 'GET',
+      headers: {
+        currentPage: `1`,
+        pageSize: `10`
+      }
+    })
+      .then((response) => {
+        console.log(id, 'success!');        
+        this.setState({medicalRecordsList: response.data});
+        this.setState({showMedicalModal: true, isLoading: false});
+      })
+      .catch((error) => {
+        this.setState({isLoading: false});
+        console.log(error.message);
+        Alert.alert('', 'No medical record is found.');
+      });
+  }
+
   /***************************************************************
    * Render the card list of all pets in summary
   ****************************************************************/
@@ -123,12 +191,34 @@ export default class ViewMyPetsScreen extends Component {
               </View>
 
               <View style={{paddingVertical: 3}}>
-                <Text style={{fontWeight: 'bold'}}>RFID Number: <Text>{data.rfidNumber}</Text></Text>
-                <Text style={{fontWeight: 'bold'}}>RFID Status: {data.rfidStatus ? 'Active' : 'Inactive'}</Text>
+                <Text><Text style={{fontWeight: "bold"}}>RFID Number: </Text>{data.rfidNumber}</Text>
+                <Text><Text style={{fontWeight: "bold"}}>RFID Status: </Text>{data.rfidStatus ? 'Active' : 'Inactive'}</Text>
               </View>
               <View style={{padding: 3}}/>
 
+              <View style={{flexDirection: 'row'}}>
+                <Button
+                  containerStyle={{padding: 5, width: 172}}
+                  titleStyle={{fontSize: 15, fontWeight: 'bold'}}
+                  buttonStyle={{backgroundColor: 'green', borderRadius: 20, marginLeft: 0, marginRight: 0, marginBottom: 0}}
+                  title="View Vaccination Records" 
+                  onPress={() => {
+                    this.getVaccinationRecord(data.petId);
+                  }}
+                />
 
+                <Button
+                  containerStyle={{padding: 5, width: 172}}
+                  titleStyle={{fontSize: 15, fontWeight: 'bold'}}
+                  buttonStyle={{backgroundColor: 'red', borderRadius: 20, marginRight: 0, marginBottom: 0}}
+                  title="View Medical Records" 
+                  onPress={() => {
+                    this.getMedicalRecord(data.petId);
+                  }}
+                />
+              </View>
+
+              <View style={{padding: 3}}/>
               {/* display latest locations button only if RFID is active */}
               {
                 data.rfidStatus &&
@@ -149,7 +239,96 @@ export default class ViewMyPetsScreen extends Component {
       </View>
     );
   }
-    
+  
+  /***************************************************************
+   * Render the overlay screen when View Vaccination record is clicked
+  ****************************************************************/
+  renderViewVaccinationModal() {
+    return (
+      <Overlay 
+        isVisible={this.state.showVaccinationModal}
+        overlayStyle={{
+          width: Dimensions.get('window').width - 50,
+          height: Dimensions.get('window').height - 350
+        }}
+        onBackdropPress={() => {this.setState({showVaccinationModal: true});}}
+      >
+        <View>
+          <View style={{padding: 10, marginBottom: 20}}>
+            <ScrollView style={{paddingBottom: 10}} contentContainerStyle={{height: Dimensions.get('window').height * 2}}>
+              {
+                this.state.vaccinationRecordsList.map((value, index) => {
+                  return (
+                    <View key={index} style={{paddingVertical: 3, marginBottom: 10, borderWidth: 1, backgroundColor: '#FFDBAC', borderRadius: 10}}>
+                      <Text><Text style={{fontWeight: "bold"}}>Immunization Date: </Text>{value.immunizationDate}</Text>
+                      <Text><Text style={{fontWeight: "bold"}}>Vaccination Name: </Text>{value.vaccinationName}</Text>
+                      <Text><Text style={{fontWeight: "bold"}}>Veterinarian Name: </Text>{value.veterinarianName}</Text>
+                      <Text><Text style={{fontWeight: "bold"}}>Veterinarian Contact: </Text>{value.veterinarianContact}</Text>
+                    </View>
+                  );
+                })
+              }
+              
+            </ScrollView>
+          </View>
+
+          <Button
+            containerStyle={{padding: 5, width: 300, alignSelf: 'center', position: 'absolute', bottom: 0, marginBottom: 10}}
+            titleStyle={{fontSize: 17, fontWeight: 'bold'}}
+            buttonStyle={{borderRadius: 20, marginRight: 0, marginBottom: 0}}
+            title="Close" 
+            onPress={() => this.setState({showVaccinationModal: false})}                
+          />
+
+        </View>
+      </Overlay>
+    );
+  }
+
+  /***************************************************************
+   * Render the overlay screen when View Medical record is clicked
+  ****************************************************************/
+  renderViewMedicalModal() {
+    return (
+      <Overlay 
+        isVisible={this.state.showMedicalModal}
+        overlayStyle={{
+          width: Dimensions.get('window').width - 50,
+          height: 500
+        }}
+        onBackdropPress={() => {this.setState({showMedicalModal: true});}}
+      >
+        <View>
+          <View style={{padding: 10, marginBottom: 20}}>
+            <ScrollView style={{paddingBottom: 10}} contentContainerStyle={{height: Dimensions.get('window').height * 2}}>
+              {
+                this.state.medicalRecordsList.map((value, index) => {
+                  console.log(value, index);
+                  return (
+                    <View key={index} style={{paddingHorizontal: 5, paddingVertical: 10, marginBottom: 10, borderWidth: 1, backgroundColor: '#FFDBAC', borderRadius: 10}}>
+                      <Text><Text style={{fontWeight: "bold"}}>Date Visited: </Text>{value.medicalAssignDate}</Text>
+                      <Text><Text style={{fontWeight: "bold"}}>Condition: </Text>{value.medical}</Text>     
+                    </View>
+                  );
+                })
+              }
+              
+            </ScrollView>
+          </View>
+
+          <Button
+            containerStyle={{padding: 5, width: 300, alignSelf: 'center', position: 'absolute', bottom: 0, marginBottom: 10}}
+            titleStyle={{fontSize: 17, fontWeight: 'bold'}}
+            buttonStyle={{borderRadius: 20, marginRight: 0, marginBottom: 0}}
+            title="Close" 
+            onPress={() => this.setState({showMedicalModal: false})}                
+          />
+
+        </View>
+      </Overlay>
+    );
+  }
+
   render() {
     
     // Display the spinning wheel to show that the app is still loading
@@ -171,6 +350,8 @@ export default class ViewMyPetsScreen extends Component {
           </ScrollView>
         </View>
 
+        {this.state.showVaccinationModal && this.renderViewVaccinationModal()}
+        {this.state.showMedicalModal && this.renderViewMedicalModal()}
 
       </SafeAreaView>
     );

@@ -6,8 +6,9 @@ import { Alert } from 'antd';
 /**
  * This class renders the components to register the veterinarian and call the API to insert new record to the database.
  * 
- * Date: 12/9/2021
- * Author: Putthida Samrith
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class SignUp extends Component {
 

@@ -3,6 +3,12 @@ import React, { Component } from "react";
 import { StyleSheet, Text, View, ActivityIndicator, Dimensions } from "react-native";
 import { Button } from 'react-native-elements';
 
+/**
+ * This class renders the account screen to log user out.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class AccountScreen extends Component {
   
   constructor(props) {

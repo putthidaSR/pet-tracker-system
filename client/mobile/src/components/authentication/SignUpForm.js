@@ -9,6 +9,9 @@ import {REQUEST_URLS} from '../../Configuration';
 /**************************************************************************************
  * This class renders the sign-up form that will display for unauthorized user 
  * or user who launches the app for the first time.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  **************************************************************************************/
 export default class SignUpForm extends Component {
 
@@ -30,6 +33,10 @@ export default class SignUpForm extends Component {
     this.handleSignUpUser = this.handleSignUpUser.bind(this);
   }
   
+  /**
+   * Handle the action when users click on sign up.
+   * This function will call the API to update records in the database.
+   */
   async handleSignUpUser() {
 
     // Check for form validation

@@ -6,6 +6,9 @@ import {USER_KEY_STORAGE} from './Configuration';
 
 /**
  * The first component that the application will render when the app is loaded.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 export default class App extends React.Component {
 

@@ -13,6 +13,13 @@ const LONGITUDE_DELTA = 0.035;
 const LATITUDE = 47.244839;
 const LONGITUDE = -122.437828;
 
+/**
+ * This component renders the screen to view the last 10 locations of the specified pet.
+ * Google map is implemented to display the markers that represent pet's location.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class PetLocationScreen extends Component {
   
   constructor(props) {
@@ -20,6 +27,8 @@ export default class PetLocationScreen extends Component {
       
     this.state = {
       petId: this.props.route.params.petId,
+
+      // hard-code initial location values (for testing purpose)
       initialRegion: {
         latitude: 47.244839,
         longitude: -122.437828,
@@ -29,6 +38,8 @@ export default class PetLocationScreen extends Component {
       currentLatitude: 47.244839,
       currentLongitude: -122.437828,
       markers: [],
+
+      // default values (for testing purpose)
       coordinates: [
         { address: '1900 Commerce St, Tacoma, WA 98402', latitude: 47.244839, longitude: -122.437828, latestUpdate: '2021-11-29 07:56:09'},
         { address: '15 Cook St, Tacoma, WA 98402, USA', latitude: 47.244821, longitude: -122.437257, latestUpdate: '2021-11-29 07:56:09'},
@@ -42,15 +53,24 @@ export default class PetLocationScreen extends Component {
     this.getCurrentDeviceLocation = this.getCurrentDeviceLocation.bind(this);
 
   }
-    
+
+  /**
+   * Get initial data
+   */
   async componentDidMount() {
     await this.getCurrentDeviceLocation();
   }
 
+  /**
+   * Called immediately before a component is destroyed. This method is to perform any necessary cleanup.
+   */
   componentWillUnmount() {
     this.watchID != null && Geolocation.clearWatch(this.watchID);
   }
 
+  /**
+   * Get current device's location (latitude, longitude)
+   */
   async getCurrentDeviceLocation() {
     // Initial the Map view with device's current location
     this.setState({isLoading: true});
@@ -86,6 +106,9 @@ export default class PetLocationScreen extends Component {
     });
   }
 
+  /**
+   * Fetch the last 10 locations of the pets with the specified pet ID.
+   */
   getPetLocationData = async() => {
 
     this.setState({isLoading: true});
@@ -110,6 +133,7 @@ export default class PetLocationScreen extends Component {
             }});
           var fullAddress = responseAddress.data.display_name;
           
+          // Get current locations of all pets that belong to the specified user
           const objectToAdd = {
             name: data[i].petName,
             latitude: data[i].latitude,
@@ -150,9 +174,11 @@ export default class PetLocationScreen extends Component {
       longitudeDelta: 0.005
     });
 
-    //this._carousel.snapToItem(index);
   }
 
+  /**
+   * Helper method to initialize default location.
+   */
   goToInitialLocation() {
     let initialRegion = Object.assign({}, this.state.initialRegion);
     initialRegion["latitudeDelta"] = 0.005;
@@ -179,7 +205,6 @@ export default class PetLocationScreen extends Component {
           ref={map => {this._map = map; }}
           style={styles.map}
           loadingEnabled={true}
-          //initialRegion={this.getMapRegion()}
           followUserLocation={true}
           showsUserLocation={true}
           zoomEnabled={true}
@@ -198,6 +223,7 @@ export default class PetLocationScreen extends Component {
             title="Your Destination"
           />
           
+          {/** Display marker on the map to represent pet's location (based on latitude and longitude) */}
           {this.state.coordinates.map((marker, index) => {
             //console.log(marker, index);
             return (
@@ -208,6 +234,8 @@ export default class PetLocationScreen extends Component {
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
                 image={require('./../../assets/images/pet-location.png')}
               >
+
+                {/** Display the card when user presses on marker on the map */}
                 <Callout>
                   <View style={{width: 250, height: 150, padding: 5}}>
 

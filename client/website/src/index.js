@@ -1,5 +1,8 @@
 /**
- * This is the starting point of the website.
+ * This is the starting point of the website where we register the root element to DOM and initialize bootstrap.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
  */
 import React from 'react';
 import ReactDOM from 'react-dom';

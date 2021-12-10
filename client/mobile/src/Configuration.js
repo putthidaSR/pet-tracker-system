@@ -1,4 +1,11 @@
-// Local key storage (key to store in app cache)
+/**
+ * This class contains different common varialbes that will be used throughout the entire project.
+ * 
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
+
+// Local key storage (unique key to store in app cache)
 export const USER_KEY_STORAGE = '@USERNAME_ASYNC_KEY';
 export const USER_ID_KEY_STORAGE = 'CurrentUserID_Key';
 export const USER_NICKNAME_KEY_STORAGE = 'CurrentUserNickName_Key';
@@ -11,6 +18,7 @@ export const USER_ROLE = {
   VETERINARIAN: 'Veterinarian'
 };
 
+// Server properties
 export const SERVER_IP_ADDRESS = '10.0.0.236:8080';
 export const REQUEST_URL_PREFIX = 'http://' + SERVER_IP_ADDRESS + '/PawTracker';
 
@@ -31,6 +39,9 @@ export const REQUEST_URLS = {
   VIEW_ALL_PETS_DETAILS: REQUEST_URL_PREFIX + '/pets', // GET
   UPDATE_PET_DETAILS: REQUEST_URL_PREFIX + '/pets', // PUT
   DELETE_PET_BY_ID: REQUEST_URL_PREFIX + '/pets', // DELETE
+
+  VIEW_VACCINATION_RECORDS: REQUEST_URL_PREFIX + '/pets',
+  VIEW_MEDICAL_RECORDS: REQUEST_URL_PREFIX + '/pets',
 
   // Locations
   GET_ALL_LOCATIONS_FOR_PET_ID: REQUEST_URL_PREFIX + '/locations', // GET: Get locations of the specified petId

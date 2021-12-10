@@ -5,6 +5,14 @@ import {REQUEST_URLS} from '../../Configuration';
 import { Button } from 'react-native-elements';
 import axios from 'axios';
 
+/**
+ * This class renders the component to register user with pet's owner role.
+ * Pet's owner will then receive text message with confirmation code once the 
+ * veterinarian has successfully register them to the system.
+ *
+ * @author Putthida Samrith
+ * @date 12/9/2021
+ */
 export default class UserRegistration extends Component {
   
   constructor(props) {
