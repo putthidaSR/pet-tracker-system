@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,6 +23,7 @@ import com.google.gson.Gson;
 
 import tcss559.hibernate.HibernateUtils;
 import tcss559.model.PetMedical;
+import tcss559.request.MedicalUpdateDTO;
 
 /**
  * Root resource (exposed at "pets" path).
@@ -201,5 +204,72 @@ public class MedicalProvider {
         return Response.status(Response.Status.OK).entity(responseData).build();
 	}
 	
+	/**
+	 * @api {DELETE} /medicals/{id} Delete a medical record
+	 * @apiName DeleteMedicalRecord
+	 * @apiGroup MedicalProvider
+	 *
+	 * @apiParam {Number} id ID of the record to be deleted
+	 * 
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	@Path("/medicals/{id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response DeleteMedicalRecord(@PathParam("id") int id) {
+		
+		Session session = HibernateUtils.getSession();
+		Transaction t = session.beginTransaction();
+		
+		// disable foreign key constraints check
+		session.createSQLQuery("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+
+		// delete a record with the primary key
+		Query query = session.createSQLQuery("DELETE FROM pet_medical where id = :id");
+		query.setParameter("id", id);
+		query.executeUpdate();
+
+		// enable foreign key constraints check
+		session.createSQLQuery("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
+		
+		t.commit();
+        session.close();
+        return Response.status(Response.Status.OK).entity("").build();	
+	}
+	
+	/**
+	 * @api {PUT} /medicals/{id} Update a medical record
+	 * @apiName UpdateMedicalRecord
+	 * @apiGroup MedicalProvider
+	 *
+	 * @apiParam {Number} id ID of the record to be updated
+	 * @apiParam {String} medical pet's medical
+	 * @apiParamExample {json} Request Body - Example:
+	 *		{
+	 *			"medical": "Aspirin"
+	 *     	}
+	 * @apiSuccessExample {json} Success-Response:
+	 *     HTTP/1.1 200 OK
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	@Path("/medicals/{id}")
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response UpdateMedicalRecord(@PathParam("id") int id, MedicalUpdateDTO medicalUpdateDTO) {
+		
+		Session session = HibernateUtils.getSession();
+		Transaction t = session.beginTransaction();
+		// update a record with the primary key
+		Query query = session.createSQLQuery("UPDATE pet_medical SET medical = :medical WHERE id = :id");
+		query.setParameter("medical", medicalUpdateDTO.getMedical());
+		query.setParameter("id", id);
+		query.executeUpdate();
+		t.commit();
+        session.close();
+        return Response.status(Response.Status.OK).entity("").build();	
+	}
 	
 }
