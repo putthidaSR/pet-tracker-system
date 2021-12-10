@@ -89,8 +89,8 @@ export default class HomepageScreen extends Component {
             style={{width: 100, height: 100, resizeMode: 'contain'}}
             source={require('./../assets/images/app-logo.png')}
           />
-          <Text style={{...styles.titleText, paddingTop: 10, fontSize: 30, color: '#fff'}}>
-            {this.state.userRole == USER_ROLE.PET_OWNER ? 'Welcome to the largest paw community!' : 'Welcome to PawTracker, veterinarian!!!'}</Text>
+          <Text style={{...styles.titleText, paddingTop: 10, color: '#fff', width: 300}}>
+            {this.state.userRole === USER_ROLE.PET_OWNER ? 'Welcome to the largest paw community!' : 'Welcome to PawTracker, veterinarian!'}</Text>
         </View>
       </View>
     );
@@ -133,22 +133,29 @@ export default class HomepageScreen extends Component {
 
         {this.renderTitleView()}
 
-        <Image
-          style={{width: 100, height: 100, resizeMode: 'contain'}}
-          source={require('./../assets/images/paw.gif')}
-        />
-        
         {
-          this.state.userRole == USER_ROLE.PET_OWNER &&
+          this.state.userRole === USER_ROLE.PET_OWNER &&
             <View style={styles.buttonContainer}>
+              <View style={{padding:10, marginTop: 30}} />
+
               {this.renderMenuOption("View All My Pets", 'ViewMyPets', require('./../assets/images/view-pets.png'))}
               {this.renderMenuOption("Where Are My Pets?", 'PetLocationScreen', require('./../assets/images/pet-location.png'))}
+              <View style={{justifyContent: 'center', alignSelf: 'center', marginTop: 80}}>
+                <Image
+                  style={{width: 300, height: 200, resizeMode: 'contain'}}
+                  source={require('./../assets/images/footer.png')} />
+              </View>
+              
             </View>
         }
 
         {
-          this.state.userRole == USER_ROLE.VETERINARIAN &&
+          this.state.userRole === USER_ROLE.VETERINARIAN &&
             <View style={styles.buttonContainer}>
+              <Image
+                style={{width: 100, height: 100, resizeMode: 'contain'}}
+                source={require('./../assets/images/paw.gif')}
+              />
               {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/user-add.png'))}
               {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
               {this.renderMenuOption("View All Pets", 'ViewAllPets', require('./../assets/images/view-pets.png'))}
@@ -204,9 +211,9 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: '#EAF1FF',
-    fontFamily: 'SavoyeLetPlain',
     fontWeight: 'bold',
-    fontSize: 70,
+    fontSize: 18,
+    textAlign: 'center',
     alignSelf: 'center',
     paddingTop: 10,
     paddingBottom: 10,
@@ -216,7 +223,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignSelf: 'center',
-    height: OPTIONS_HEIGHT_VIEW
+    height: OPTIONS_HEIGHT_VIEW,
+    marginTop: 10
   },
   bottonOptionText: {
     textAlign: 'center', 
