@@ -192,7 +192,7 @@ export default class PetRegistrationScreen extends Component {
         />
 
         <View style={{marginLeft: 10, paddingBottom:10}}>
-          <Text style={{...styles.fieldTitleText, marginLeft: -10}}>Spcies<Text style={{color: 'red'}}> *</Text></Text>
+          <Text style={{...styles.fieldTitleText, marginLeft: -10}}>Species<Text style={{color: 'red'}}> *</Text></Text>
           <ButtonGroup
             textStyle={{fontSize: 12}}
             onPress={(selectedIndex) => {
