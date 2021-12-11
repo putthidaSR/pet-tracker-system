@@ -156,7 +156,7 @@ export default class HomepageScreen extends Component {
                 style={{width: 100, height: 100, resizeMode: 'contain'}}
                 source={require('./../assets/images/paw.gif')}
               />
-              {this.renderMenuOption("Register New User", 'UserRegistration', require('./../assets/images/user-add.png'))}
+              {this.renderMenuOption("Register New Pet Owner", 'UserRegistration', require('./../assets/images/user-add.png'))}
               {this.renderMenuOption("Register New Pet", 'PetRegistration', require('./../assets/images/pet-registration.png'))}
               {this.renderMenuOption("View All Pets", 'ViewAllPets', require('./../assets/images/view-pets.png'))}
             </View>
