@@ -1,5 +1,6 @@
 # Project Structure Overview
 
+```
 ├── api-doc
 ├── database
 ├── client
@@ -9,7 +10,7 @@
 │   │  ├── src
 ├── server
 │   ├── pet-tracker
-
+```
 
 - api-doc/ : Contains API documentations
 - database/: Contains schema and sample data for MySQL
@@ -20,7 +21,8 @@ NOTE:
 - In client/mobile/, most code are auto-generated with react-native framework. The code we wrote is located in the following directories: /client/mobile/src
 - In client/website/, most code are auto-generated with ReactJS framework. The code we wrote is located in the following directories: /client/website/src
 
-==============================================================================================================
+---
+
 ## How to run the server locally
 
 ### Setup MySQL Server
@@ -36,7 +38,7 @@ NOTE:
 - Create a new Tomcat v9.0 server with the current project (pet-tracker)
 - Start the server
 
-==============================================================================================================
+---
 
 ## How to run the mobile application locally
 
@@ -79,8 +81,7 @@ Navigate to the root of the mobile project (/code/client/mobile) and install all
 > Resource: https://facebook.github.io/react-native/docs/debugging
 
 
-==============================================================================================================
-
+---
 ## How to run the website locally
 
 ### Dependencies Installation
